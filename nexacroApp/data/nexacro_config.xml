@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<nexacro-config>
+    
+    <!-- application dialog-position: 업데이트 진행정보 출력 위치(top, center, bottom) -->
+    <!-- application file-logging: 초기 로딩 에러 정보를 파일로 떨구지 여부, 파일은 iTunes 를 통해서 확인 가능 -->
+    <!-- application quiet: iOS에서는 Android와는 다르게 html로 부트스트랩 정보를 읽어 들이므로 사용하지 않는 속성임. 다만 quite를 true로 설정시 updator quiet="true" 한것과 동일하게 동작하게 맞추어 놓음 -->
+    <application dialog-position="bottom" file-logging="true" quiet="false"/>
+    
+    <!-- notification enable: 노티피케이션 기능을 사용하지 여부 -->
+    <!-- notification handler: 사용자 정의 노티피케이션 핸들명 -->
+    <notification enable="true" handler="DefaultNotificationManagerHandler"/>
+    
+    <!-- updator force: start_ios.json 정보로 부터 업데이트 파일 존재시 팝업창 표시 여부, true 시 팝업 창으로 확인 없어 강제 업데이트 진행 -->
+    <!-- updator cancelable: start_ios.json 정보로 부터 업데이트 파일 존재시 팝업창이 표시될때 취소 버튼 표시 여부, 취소 클릭시 앱이 종료됨 -->
+    <!-- updator errormsg: 초기로딩중 로딩에 실패했을때 에러 정보 팝업을 출력할지 여부, 최종 사용자 한테는 불필요한 정보이므로 배포시에는 false 로 할것 -->
+    <!-- updator quiet: 업데이트 확인중 메시지를 숨길지 여부, true로 하더라도 업데이트 존재시 업데이트 수행중의 단계숫자는 출력됨 -->
+    <updator force="false" cancelable="false" errormsg="true" quiet="false"/>
+    
+    <!-- splashimage scaletype(stretch, cover, contain, auto) 과 backgroundcolor 지원    -->
+<!--    <splash scaletype="contain" background-color="#ffe3ff"/>-->
+
+    
+
+</nexacro-config>

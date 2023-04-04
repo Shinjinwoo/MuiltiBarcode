@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="21507" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+    <device id="retina6_0" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="21505"/>
+        <capability name="Image references" minToolsVersion="12.0"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="System colors in document resources" minToolsVersion="11.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="MultiQRBarcodeViewController">
+            <connections>
+                <outlet property="backBtn" destination="jLe-cZ-unh" id="dz7-f7-EWI"/>
+                <outlet property="cameraBtn" destination="rFa-Lj-eZv" id="wmv-ix-Tcb"/>
+                <outlet property="cameraView" destination="X8L-Vp-CDw" id="qDs-Oc-FqA"/>
+                <outlet property="view" destination="68e-tA-doT" id="a5N-QQ-SJ8"/>
+            </connections>
+        </placeholder>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <view clearsContextBeforeDrawing="NO" contentMode="scaleAspectFill" id="68e-tA-doT">
+            <rect key="frame" x="0.0" y="0.0" width="390" height="844"/>
+            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+            <subviews>
+                <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="X8L-Vp-CDw" userLabel="Camera View">
+                    <rect key="frame" x="0.0" y="87" width="390" height="583"/>
+                    <color key="backgroundColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                </view>
+                <button opaque="NO" contentMode="scaleToFill" semanticContentAttribute="forceLeftToRight" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="rFa-Lj-eZv">
+                    <rect key="frame" x="182.33333333333334" y="727.33333333333337" width="25.666666666666657" height="25.666666666666629"/>
+                    <fontDescription key="fontDescription" type="system" pointSize="16"/>
+                    <color key="tintColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                    <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
+                    <state key="normal">
+                        <color key="titleColor" systemColor="labelColor"/>
+                        <imageReference key="image" image="circle.fill" catalog="system" symbolScale="large"/>
+                    </state>
+                    <connections>
+                        <action selector="onCaptureBtnClick:" destination="-1" eventType="touchUpInside" id="Mhe-IW-yi4"/>
+                    </connections>
+                </button>
+                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="jLe-cZ-unh">
+                    <rect key="frame" x="0.0" y="47" width="40" height="40"/>
+                    <constraints>
+                        <constraint firstAttribute="height" constant="40" id="Umf-hi-kNd"/>
+                        <constraint firstAttribute="width" constant="40" id="eUV-0e-Hfc"/>
+                    </constraints>
+                    <fontDescription key="fontDescription" type="system" pointSize="1"/>
+                    <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
+                    <state key="normal">
+                        <imageReference key="image" image="chevron.backward" catalog="system" symbolScale="large"/>
+                    </state>
+                    <connections>
+                        <action selector="onBackBtnClick:" destination="-1" eventType="touchUpInside" id="zua-LR-Gfo"/>
+                    </connections>
+                </button>
+            </subviews>
+            <viewLayoutGuide key="safeArea" id="31e-WB-5bB"/>
+            <color key="backgroundColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+            <constraints>
+                <constraint firstItem="X8L-Vp-CDw" firstAttribute="centerX" secondItem="68e-tA-doT" secondAttribute="centerX" id="QIb-VE-qFn"/>
+                <constraint firstItem="rFa-Lj-eZv" firstAttribute="centerX" secondItem="X8L-Vp-CDw" secondAttribute="centerX" id="S0V-O1-7lx"/>
+                <constraint firstItem="jLe-cZ-unh" firstAttribute="top" secondItem="31e-WB-5bB" secondAttribute="top" id="ayv-99-LIT"/>
+                <constraint firstItem="X8L-Vp-CDw" firstAttribute="top" secondItem="jLe-cZ-unh" secondAttribute="bottom" id="cTV-GZ-cVC"/>
+                <constraint firstItem="jLe-cZ-unh" firstAttribute="leading" secondItem="31e-WB-5bB" secondAttribute="leading" id="dA6-i6-Qbi"/>
+                <constraint firstItem="rFa-Lj-eZv" firstAttribute="centerY" secondItem="X8L-Vp-CDw" secondAttribute="bottom" constant="70" id="flu-ws-JYk"/>
+                <constraint firstItem="X8L-Vp-CDw" firstAttribute="leading" secondItem="31e-WB-5bB" secondAttribute="leading" id="nLC-Qv-vts"/>
+                <constraint firstItem="X8L-Vp-CDw" firstAttribute="bottom" secondItem="31e-WB-5bB" secondAttribute="bottom" constant="-140" id="p5w-yE-5RX"/>
+            </constraints>
+            <point key="canvasLocation" x="125.59999999999999" y="-11.083743842364532"/>
+        </view>
+    </objects>
+    <resources>
+        <image name="chevron.backward" catalog="system" width="97" height="128"/>
+        <image name="circle.fill" catalog="system" width="128" height="123"/>
+        <systemColor name="labelColor">
+            <color red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </systemColor>
+    </resources>
+</document>

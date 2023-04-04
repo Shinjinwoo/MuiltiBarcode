@@ -1,0 +1,27 @@
+/* 
+  Localizable.strings
+  Nexacro
+
+  Created by 오 영진 on 12. 12. 3..
+
+*/
+
+"needupdate" = "It is need to update. \r\nIt will start after the update is completed.";
+"force_close" = "Update is Completed.";
+"loadingFail" = "First loading is fail. \r\nPlease restart.";
+"updateFail" = "Update is fail. \r\nPlease restart.";
+"notexist" = "Start file is NOT exist. \r\nPlease restart.";
+"BeingUpdated" = "Being updated.";
+"wantreplace" = "There is a file of the save name. Do you want to replace? ";
+"ok" = "OK";
+"cancel" = "Cancel";
+"alert_title" = "";
+"move" = "Move";
+"upper" = "Upper";
+"filter" = "Filter";
+"home" = "Home";
+"nofilename" = "No File Name.";
+"checkforupdates" = "Check for updates.";
+"installforupdates" = "Install for updates.";
+"downloadingforupdates" = "Downloading for updates.";
+"new_engine_available" = "Engine update required.";

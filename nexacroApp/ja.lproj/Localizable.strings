@@ -1,0 +1,27 @@
+/* 
+  Localizable.strings
+  Nexacro
+
+  Created by 오 영진 on 12. 12. 3..
+
+*/
+
+"needupdate" = "アップデートがあります。\r\n完了した後に始まります。";
+"force_close" = "アップデートが完了しました。";
+"loadingFail" = "初期ロードに失敗しました。\r\n再起動してください。";
+"updateFail" ="アップデートが失敗しました。\r\n再起動してください。";
+"notexist" = "起動ファイルがありません。\r\n再起動してください。";
+"BeingUpdated" = "アップデート中です。";
+"wantreplace" = "同一のファイル名があります。上書きしますか？";
+"ok" = "確認";
+"cancel" = "キャンセル";
+"alert_title" = "";
+"move" = "移動";
+"upper" = "上位";
+"filter" = "フィルター";
+"home" = "ホーム";
+"nofilename" = "ファイル名がありません。";
+"checkforupdates" = "アップデート確認中です。";
+"installforupdates" = "アップデート設置中です。";
+"downloadingforupdates" = "アップデートダウン中です。";
+"new_engine_available" = "新規バージョンがご利用になれます。";
