@@ -609,6 +609,8 @@ typedef NS_ENUM(NSInteger, Detector) {
         output.alwaysDiscardsLateVideoFrames = YES;
         dispatch_queue_t outputQueue = dispatch_queue_create(videoDataOutputQueueLabel.UTF8String, nil);
         
+        
+        
         [output setSampleBufferDelegate:self queue:outputQueue];
         
         // 샘플 버퍼 델리게이트와 콜백을 유도하는 큐를 세팅
