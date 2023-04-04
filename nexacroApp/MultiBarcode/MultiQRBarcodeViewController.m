@@ -596,7 +596,7 @@ typedef NS_ENUM(NSInteger, Detector) {
         }
         [strongSelf.captureSession beginConfiguration];
         // When performing latency tests to determine ideal capture settings,
-        // run the app in 'release' mode to get accurate performance metricstest123123ㅇㅇ
+        // run the app in 'release' mode to get accurate performance metricstest123123ㅇㅇㄱㅅㅅㅅㅅㅅ
         
         strongSelf.captureSession.sessionPreset = AVCaptureSessionPresetMedium;
         
