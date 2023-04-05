@@ -28,13 +28,7 @@ static NSString *const sessionQueueLabel = @"com.google.mlkit.visiondetector.Ses
 
 @interface MultiQRBarcodeViewController () <AVCaptureVideoDataOutputSampleBufferDelegate>
 
-typedef NS_ENUM(NSInteger, Detector) {
-    DetectorOnDeviceBarcode
-};
 
-@property(nonatomic) NSArray *detectors;
-@property(nonatomic) Detector currentDetector;
-@property(nonatomic) bool isUsingFrontCamera;
 @property(nonatomic, nonnull) AVCaptureVideoPreviewLayer *previewLayer;
 @property(nonatomic) AVCaptureSession *captureSession;
 @property(nonatomic) dispatch_queue_t sessionQueue;
@@ -43,9 +37,7 @@ typedef NS_ENUM(NSInteger, Detector) {
 @property(weak, nonatomic) IBOutlet UIView *cameraView;
 @property(nonatomic) CMSampleBufferRef lastFrame;
 
-
 @property(nonatomic, strong) AVAudioPlayer* avAudioPlayer;
-
 
 @property (weak, nonatomic) IBOutlet UIButton *cameraBtn;
 @property (weak, nonatomic) IBOutlet UIButton *backBtn;
@@ -79,6 +71,7 @@ typedef NS_ENUM(NSInteger, Detector) {
 @synthesize boxColor;
 @synthesize isUsePinchZoom;
 
+#pragma mark - UIInterfaceOrientationMask Portrait 고정
 - (UIInterfaceOrientationMask)supportedInterfaceOrientations {
     return UIInterfaceOrientationMaskPortrait;
 }
@@ -105,7 +98,6 @@ typedef NS_ENUM(NSInteger, Detector) {
     _cameraView.layer.shouldRasterize = YES;
     _cameraView.layer.rasterizationScale = [UIScreen mainScreen].scale;
     
-    
     self.view.backgroundColor = [UIColor blackColor];
     _cameraView.backgroundColor = [UIColor blackColor];
     
@@ -113,9 +105,6 @@ typedef NS_ENUM(NSInteger, Detector) {
     _barcodeFormatTable = [[NSMutableDictionary alloc]init];
     _barcodeInfoDic = [[NSMutableDictionary alloc]init];
     
-    
-    self.currentDetector = DetectorOnDeviceBarcode;
-    _isUsingFrontCamera = isUseFrontCamera;
     _captureSession = [[AVCaptureSession alloc] init];
     // 캡처세션 초기화
     _sessionQueue = dispatch_queue_create(sessionQueueLabel.UTF8String, nil);
@@ -129,6 +118,7 @@ typedef NS_ENUM(NSInteger, Detector) {
     self.previewLayer = [AVCaptureVideoPreviewLayer layerWithSession:_captureSession];
     
     self.previewLayer.connection.videoOrientation = AVCaptureVideoOrientationPortrait;
+    
     //self.previewLayer.connection.videoOrientation = AVCaptureVideoOrientationLandscapeLeft
     
     [self setUpPreviewOverlayView];
@@ -140,7 +130,6 @@ typedef NS_ENUM(NSInteger, Detector) {
     
     if ( self.isUsePinchZoom == YES )
         [self.cameraView addGestureRecognizer:pinch];
-    
 }
 
 
@@ -246,38 +235,14 @@ typedef NS_ENUM(NSInteger, Detector) {
 
 - (void)viewDidDisappear:(BOOL)animated {
     
-    //[_avAudioPlayer play];
-    
     [super viewDidDisappear:animated];
     [self stopSession];
     
 }
 
-- (void)viewSetPorfit {
-    if (@available(iOS 16.0, *)) {
-        
-        UIWindowScene *scene ;
-        NSArray *connectedScenes = [[[UIApplication sharedApplication] connectedScenes] allObjects];
-        if ([connectedScenes count] > 0) {
-            scene = (UIWindowScene *)connectedScenes[0];
-        }
-        
-        UIWindowSceneGeometryPreferences *preferences = [[UIWindowSceneGeometryPreferencesIOS alloc] initWithInterfaceOrientations:UIInterfaceOrientationMaskPortrait];
-        
-        [scene requestGeometryUpdateWithPreferences:preferences errorHandler:^(NSError * _Nonnull error) {
-            // Handle error here
-        }];
-        
-    } else {
-        NSNumber *value = [NSNumber numberWithInt:UIDeviceOrientationPortrait];
-        [[UIDevice currentDevice] setValue:value forKey:@"orientation"];
-    }
-}
-
 - (void)viewDidLayoutSubviews {
     [super viewDidLayoutSubviews];
     _previewLayer.frame = _cameraView.frame;
-    [self viewSetPorfit];
 }
 
 
@@ -329,7 +294,7 @@ typedef NS_ENUM(NSInteger, Detector) {
     }
 }
 
-#pragma mark - 사운드 재생 ( 테스트 코드 )
+#pragma mark - 사운드 재생
 
 - (void) playSound {
     @try {
@@ -343,24 +308,22 @@ typedef NS_ENUM(NSInteger, Detector) {
         _avAudioPlayer = [[AVAudioPlayer alloc] initWithContentsOfURL:soundFileURL error:&error];
         // 재생
 
-        if ( error == nil ){
+        if ( error == nil )
             [_avAudioPlayer play];
-        } else {
+        else
             [_multiQRBarcodePlugin sendEx:CODE_ERROR eventID:@"_oncallback" serviceID:SERVICE_ID
                                    andMsg:[NSString stringWithFormat:@"사운드 재생 실패 : %@",error.description]];
-        }
+        
     } @catch (NSException *exception) {
         [_multiQRBarcodePlugin sendEx:CODE_ERROR eventID:@"_oncallback" serviceID:SERVICE_ID
                                andMsg:[NSString stringWithFormat:@"사운드 재생 실패 : %@",exception.description]];
     } @finally {
-
+        
     }
-    
 }
 
 
 #pragma mark - 배열 요소별 누적 된 횟수 구하는 로직
-
 - (NSMutableDictionary*) getFrequencyCountsDic {
     
     NSMutableDictionary *frequencyCounts = [NSMutableDictionary dictionary];
@@ -480,7 +443,6 @@ typedef NS_ENUM(NSInteger, Detector) {
         }
 
 
-        bool test = false;
         
         for (MLKBarcode *barcode in barcodes) {
 
@@ -625,36 +587,82 @@ typedef NS_ENUM(NSInteger, Detector) {
 -(UILabel*)getTextLabelWithCGRect :(CGRect) standardizedRect
                   withDisplayValue:(NSString*) displayValue {
     
-    /**
-     CGRect textLabelRect = CGRectMake(  standardizedRect.origin.x + (standardizedRect.size.width  / 2),    // X
-                                         standardizedRect.origin.y,//   - 20,                               // Y
-                                         standardizedRect.size.width  / 2,                                  // Width
-                                         20 );                                                              // Height
-     */
-    CGRect textLabelRect = CGRectMake(  standardizedRect.origin.x,          // X
-                                        standardizedRect.origin.y   - 20,   // Y
-                                        standardizedRect.size.width  / 2,   // Width
-                                        20 );                               // Height
+    CGRect textLabelRect;
+    UIDeviceOrientation orientation = [[UIDevice currentDevice] orientation];
+    
+    NSMutableAttributedString *attributedText = nil;
+    
+    if (orientation == UIDeviceOrientationLandscapeLeft || orientation == UIDeviceOrientationLandscapeRight ) {
+        textLabelRect = CGRectMake( standardizedRect.origin.x + standardizedRect.size.width,// X
+                                    standardizedRect.origin.y,                              // Y
+                                    20,                                                     // Width
+                                    standardizedRect.size.height / 2 );                     // Height
+        
+        attributedText = [[NSMutableAttributedString alloc] initWithString:displayValue];
+        [attributedText addAttribute:NSVerticalGlyphFormAttributeName value:@(1) range:NSMakeRange(0, displayValue.length)];
+
+        
+    } else {
+        textLabelRect = CGRectMake( standardizedRect.origin.x,          // X
+                                    standardizedRect.origin.y   - 20,   // Y
+                                    standardizedRect.size.width  / 2,   // Width
+                                    20 );                               // Height
+        /**
+         * 우측 박스 내부 상단에 텍스트 라벨 생성
+         CGRect textLabelRect = CGRectMake(  standardizedRect.origin.x + (standardizedRect.size.width  / 2),    // X
+                                             standardizedRect.origin.y,//   - 20,                               // Y
+                                             standardizedRect.size.width  / 2,                                  // Width
+                                             20 );                                                              // Height
+         */
+    }
+    
+    
     
     
     UILabel *label = [[UILabel alloc] initWithFrame:textLabelRect];
-    label.numberOfLines = 0;
-    NSMutableString *description = [NSMutableString new];
     
-    if (displayValue)
-        [description appendString:displayValue];
+    if (orientation == UIDeviceOrientationLandscapeLeft || orientation == UIDeviceOrientationLandscapeRight )
+    {    
+        NSMutableString *description = [NSMutableString new];
+        if (displayValue)
+            [description appendString:displayValue];
 
-    label.text = description;
-    label.textAlignment = NSTextAlignmentCenter;
-    label.adjustsFontSizeToFitWidth = YES;
-    label.textColor = [UIColor blackColor];
-    label.backgroundColor = [UIColor yellowColor];
-    label.layer.borderWidth = 1.0;
-    label.layer.borderColor = [UIColor yellowColor].CGColor;
-    
-    //[strongSelf rotateView:label orientation:image.orientation];
-    //[strongSelf.annotationOverlayView addSubview:label];
-    
+        label.text = description;
+        label.textColor = [UIColor blackColor];
+        label.backgroundColor = [UIColor yellowColor];
+        label.layer.borderWidth = 1.0;
+        label.layer.borderColor = [UIColor yellowColor].CGColor;
+        label.textAlignment = NSTextAlignmentCenter;
+        label.adjustsFontSizeToFitWidth = YES;
+        
+        CATextLayer *textLayer = [[CATextLayer alloc] init];
+        textLayer.string = label.text;
+        textLayer.fontSize = label.font.pointSize;
+        textLayer.alignmentMode = kCAAlignmentCenter;
+        textLayer.wrapped = YES;
+        textLayer.foregroundColor = label.textColor.CGColor;
+        textLayer.backgroundColor = label.backgroundColor.CGColor;
+        textLayer.transform = CATransform3DMakeRotation(M_PI_2, 0, 0, 1);
+        
+        textLayer.frame = label.bounds;
+
+        CALayer *layer = label.layer;
+        [layer addSublayer:textLayer];
+
+    } else {
+        label.numberOfLines = 0;
+        NSMutableString *description = [NSMutableString new];
+        if (displayValue)
+            [description appendString:displayValue];
+
+        label.text = description;
+        label.textAlignment = NSTextAlignmentCenter;
+        label.adjustsFontSizeToFitWidth = YES;
+        label.textColor = [UIColor blackColor];
+        label.backgroundColor = [UIColor yellowColor];
+        label.layer.borderWidth = 1.0;
+        label.layer.borderColor = [UIColor yellowColor].CGColor;
+    }
     return label;
 }
 
@@ -671,8 +679,9 @@ typedef NS_ENUM(NSInteger, Detector) {
         
         
         AVCaptureDevicePosition cameraPosition =
-        strongSelf.isUsingFrontCamera ? AVCaptureDevicePositionFront : AVCaptureDevicePositionBack;
+        strongSelf.isUseFrontCamera ? AVCaptureDevicePositionFront : AVCaptureDevicePositionBack;
         //AVCaptureDevice *device = [strongSelf captureDeviceForPosition:cameraPosition];
+        
         strongSelf.device = [strongSelf captureDeviceForPosition:cameraPosition];
         // 카메라 인스턴스 생성
         
@@ -722,7 +731,6 @@ typedef NS_ENUM(NSInteger, Detector) {
         [weakSelf.captureSession startRunning];
     });
 }
-
 
 - (void)stopSession {
     __weak typeof(self) weakSelf = self;
@@ -783,7 +791,7 @@ typedef NS_ENUM(NSInteger, Detector) {
         return;
     }
     UIImageOrientation orientation =
-    _isUsingFrontCamera ? UIImageOrientationLeftMirrored : UIImageOrientationRight;
+    isUseFrontCamera ? UIImageOrientationLeftMirrored : UIImageOrientationRight;
     UIImage *image = [UIUtilities UIImageFromImageBuffer:imageBuffer orientation:orientation];
     _previewOverlayView.image = image;
 }
@@ -834,7 +842,7 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
         // 비전 이미지 : 비전 감지에 사용되는 이미지 또는 이미지 버퍼
         
         UIImageOrientation orientation = [UIUtilities
-                                          imageOrientationFromDevicePosition:_isUsingFrontCamera ? AVCaptureDevicePositionFront
+                                          imageOrientationFromDevicePosition:isUseFrontCamera ? AVCaptureDevicePositionFront
                                           : AVCaptureDevicePositionBack];
         
         //디바이스의 회전방향을 참조해서 이미지 방향을 가져온다.
