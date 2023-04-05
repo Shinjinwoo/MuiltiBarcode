@@ -44,8 +44,6 @@ typedef NS_ENUM(NSInteger, Detector) {
 @property(nonatomic) CMSampleBufferRef lastFrame;
 
 
-@property(nonatomic) int optimizeUI;
-
 @property (weak, nonatomic) IBOutlet UIButton *cameraBtn;
 @property (weak, nonatomic) IBOutlet UIButton *backBtn;
 
@@ -88,8 +86,6 @@ typedef NS_ENUM(NSInteger, Detector) {
     
     [super viewDidLoad];
     
-    
-    _optimizeUI = 0;
     _alredySend = NO;
     
     if (self.boxColor == nil )
@@ -98,6 +94,8 @@ typedef NS_ENUM(NSInteger, Detector) {
     _nexacroAppDelegate = ((NexacroAppDelegate *)[[UIApplication sharedApplication] delegate]);
     AppViewController *rootVC =  (AppViewController*)_nexacroAppDelegate.mainViewController;
     _multiQRBarcodePlugin = rootVC.multiQRBarcodePlugin;
+    
+    [_cameraBtn setImage:[self setCaptureButtonImage] forState:UIControlStateNormal];
     
     self.view.layer.shouldRasterize = YES;
     self.view.layer.rasterizationScale = [UIScreen mainScreen].scale;
@@ -112,14 +110,6 @@ typedef NS_ENUM(NSInteger, Detector) {
     _barcodeFormatTable = [[NSMutableDictionary alloc]init];
     _barcodeInfoDic = [[NSMutableDictionary alloc]init];
     
-    if (@available(iOS 13.0, *)) {
-        UIImageSymbolConfiguration *largeConfig = [UIImageSymbolConfiguration configurationWithPointSize:60 weight:UIImageSymbolWeightBold scale:UIImageSymbolScaleLarge];
-        
-        UIImage *largeBoldDoc = [UIImage systemImageNamed:@"circle.fill" withConfiguration:largeConfig];
-        [_cameraBtn setImage:largeBoldDoc forState:UIControlStateNormal];
-    } else {
-        // Fallback on earlier versions
-    }
     
     self.currentDetector = DetectorOnDeviceBarcode;
     _isUsingFrontCamera = isUseFrontCamera;
@@ -148,6 +138,21 @@ typedef NS_ENUM(NSInteger, Detector) {
     if ( self.isUsePinchZoom == YES )
         [self.cameraView addGestureRecognizer:pinch];
     
+}
+
+
+#pragma mark - 캡쳐버튼 UI 처리
+-(UIImage*)setCaptureButtonImage {
+    UIImage *largeBoldDoc;
+    if (@available(iOS 13.0, *)) {
+        UIImageSymbolConfiguration *largeConfig = [UIImageSymbolConfiguration configurationWithPointSize:60 weight:UIImageSymbolWeightBold scale:UIImageSymbolScaleLarge];
+        
+        largeBoldDoc = [UIImage systemImageNamed:@"circle.fill" withConfiguration:largeConfig];
+    } else {
+        largeBoldDoc = [UIImage imageNamed:@"circle_fill"];
+    }
+    
+    return largeBoldDoc;
 }
 
 #pragma mark - 진동 기능
@@ -448,15 +453,8 @@ typedef NS_ENUM(NSInteger, Detector) {
     // '스캐너 옵션'을 기준으로 '스캐너' 인스턴스 생성
     
     NSError *error;
-    
     NSArray<MLKBarcode *> *barcodes = [scanner resultsInImage:image error:&error];
     
-    /*
-     - (void)processImage:(nonnull id<MLKCompatibleImage>)image
-     completion:(nonnull MLKBarcodeScanningCallback)completion;
-     
-     고정된 이미지 처리
-     */
     
     __weak typeof(self) weakSelf = self;
     dispatch_sync(dispatch_get_main_queue(), ^{
