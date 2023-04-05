@@ -248,7 +248,6 @@ const int MLKBarcodeFormatAll = 0xFFFF;
     
     #pragma mark  기타 내부설정 Set
     //====================================== 기타 내부설정 Set =====================================================
-    //test가나다라마바사
     //CGFloat alpha = [[dic valueForKey:@"setFocusedAreaOpacity"]floatValue];
     //NSString *hexColor = [dic valueForKey:@"setFocusedAreaColor"];
     //UIColor *color = [self hexcodeToUiColor:hexColor alpha:alpha];

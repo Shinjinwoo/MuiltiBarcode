@@ -489,7 +489,6 @@ typedef NS_ENUM(NSInteger, Detector) {
             CGRect standardizedRect = CGRectStandardize( [strongSelf.previewLayer rectForMetadataOutputRectOfInterest:normalizedRect] );
             
             // 카메라 화면을 기준으로 박스의 비율을 '상대적'으로 계산
-
             [UIUtilities addRectangle:standardizedRect
                                toView:strongSelf.annotationOverlayView
                                 //color:UIColor.greenColor
@@ -500,6 +499,7 @@ typedef NS_ENUM(NSInteger, Detector) {
             if ( self.isUseTextLabel == YES ) {
                     
                 UILabel *textLabel = [self getTextLabelWithCGRect:standardizedRect withDisplayValue:barcode.displayValue];
+                
                 
                 [strongSelf.annotationOverlayView addSubview:textLabel];
             }
@@ -621,7 +621,12 @@ typedef NS_ENUM(NSInteger, Detector) {
 -(UILabel*)getTextLabelWithCGRect :(CGRect) standardizedRect
                   withDisplayValue:(NSString*) displayValue {
     
-    
+    /**
+     CGRect textLabelRect = CGRectMake(  standardizedRect.origin.x + (standardizedRect.size.width  / 2),    // X
+                                         standardizedRect.origin.y,//   - 20,                               // Y
+                                         standardizedRect.size.width  / 2,                                  // Width
+                                         20 );                                                              // Height
+     */
     CGRect textLabelRect = CGRectMake(  standardizedRect.origin.x,          // X
                                         standardizedRect.origin.y   - 20,   // Y
                                         standardizedRect.size.width  / 2,   // Width
@@ -663,9 +668,7 @@ typedef NS_ENUM(NSInteger, Detector) {
         
         AVCaptureDevicePosition cameraPosition =
         strongSelf.isUsingFrontCamera ? AVCaptureDevicePositionFront : AVCaptureDevicePositionBack;
-        
         //AVCaptureDevice *device = [strongSelf captureDeviceForPosition:cameraPosition];
-        
         strongSelf.device = [strongSelf captureDeviceForPosition:cameraPosition];
         // 카메라 인스턴스 생성
         
