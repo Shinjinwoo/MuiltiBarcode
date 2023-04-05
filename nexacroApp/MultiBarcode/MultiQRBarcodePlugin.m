@@ -21,8 +21,8 @@
 #define CALL_BACK   @"_oncallback"
 
 
-const int NexacroFormatALL = 0;
-const int MLKBarcodeFormatAll = 0xFFFF;
+const int NEXA_FORMAT_ALL = 0;
+const int MLKIT_FORMAT_ALL = 0xFFFF;
 
 
 
@@ -267,8 +267,8 @@ const int MLKBarcodeFormatAll = 0xFFFF;
 -(NSInteger) getSacnFormat : (NSArray*)setBarcodeFormat {
     NSInteger result = [setBarcodeFormat[0] integerValue];
     for ( int i = 0; i < setBarcodeFormat.count; i ++) {
-        if ( [setBarcodeFormat[i] integerValue] == NexacroFormatALL ) {
-            result |= MLKBarcodeFormatAll;
+        if ( [setBarcodeFormat[i] integerValue] == NEXA_FORMAT_ALL ) {
+            result |= MLKIT_FORMAT_ALL;
         }
         result |= [setBarcodeFormat[i] integerValue];
     }
