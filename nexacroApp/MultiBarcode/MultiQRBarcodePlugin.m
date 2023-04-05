@@ -20,6 +20,12 @@
 #define CALL_RECV   @"_onreceive"
 #define CALL_BACK   @"_oncallback"
 
+
+const int NexacroFormatALL = 0;
+const int MLKBarcodeFormatAll = 0xFFFF;
+
+
+
 @implementation MultiQRBarcodePlugin {
     AppViewController *rootViewController;
     NexacroAppDelegate *appDelegate;
@@ -254,7 +260,6 @@
     
     [multiQRBarcodeVC setModalPresentationStyle:UIModalPresentationFullScreen];
     
-    
     [rootViewController presentViewController:multiQRBarcodeVC animated:YES completion:nil];
     
 }
@@ -262,10 +267,9 @@
 #pragma mark - 스캔할 포맷 비트연산
 -(NSInteger) getSacnFormat : (NSArray*)setBarcodeFormat {
     NSInteger result = [setBarcodeFormat[0] integerValue];
-    
     for ( int i = 0; i < setBarcodeFormat.count; i ++) {
-        if ( [setBarcodeFormat[i] integerValue] == 0 ) {
-            result |= 0xFFFF;
+        if ( [setBarcodeFormat[i] integerValue] == NexacroFormatALL ) {
+            result |= MLKBarcodeFormatAll;
         }
         result |= [setBarcodeFormat[i] integerValue];
     }

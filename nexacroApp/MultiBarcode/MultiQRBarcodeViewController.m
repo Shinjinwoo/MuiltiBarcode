@@ -839,7 +839,11 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
         // 버퍼를 통해 이미지 가로세로 길이 Get
         
         MLKBarcodeScannerOptions *options = [[MLKBarcodeScannerOptions alloc]
-                                             initWithFormats:self.barcodeFormat ];
+                                             initWithFormats:
+                                                 self.barcodeFormat
+                                                //MLKBarcodeFormatQRCode | MLKBarcodeFormatCode93 | MLKBarcodeFormatCode39
+        
+        ];
         
         [self scanBarcodesOnDeviceInImage:visionImage
                                     width:imageWidth
