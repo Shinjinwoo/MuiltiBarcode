@@ -498,15 +498,10 @@ typedef NS_ENUM(NSInteger, Detector) {
             
             // 포커스 된 바코드 영역을 MLKit Result를 통해 화면에 그리는 UI 작업
             if ( self.isUseTextLabel == YES ) {
+                    
+                UILabel *textLabel = [self getTextLabelWithCGRect:standardizedRect withDisplayValue:barcode.displayValue];
                 
-                CGRect testLabelRect = CGRectMake(   standardizedRect.origin.x,          // X
-                                                     standardizedRect.origin.y - 20,     // Y
-                                                     standardizedRect.size.width / 2,    // Width
-                                                     20 );                               // Height
-        
-                
-                UILabel *label = [self getTextLabelWithCGRect:&testLabelRect withDisplayValue:barcode.displayValue];
-                [strongSelf.annotationOverlayView addSubview:label];
+                [strongSelf.annotationOverlayView addSubview:textLabel];
             }
             
             // 포커스된 바코드영역에 텍스트 라벨을 화면에 그리는 UI 작업
@@ -623,17 +618,23 @@ typedef NS_ENUM(NSInteger, Detector) {
     });
 }
 #pragma mark 텍스트 라벨 추가 함수
--(UILabel*)getTextLabelWithCGRect :(CGRect*) rect
+-(UILabel*)getTextLabelWithCGRect :(CGRect) standardizedRect
                   withDisplayValue:(NSString*) displayValue {
     
-    UILabel *label = [[UILabel alloc] initWithFrame:*rect];
+    
+    CGRect textLabelRect = CGRectMake(  standardizedRect.origin.x,          // X
+                                        standardizedRect.origin.y   - 20,   // Y
+                                        standardizedRect.size.width  / 2,   // Width
+                                        20 );                               // Height
+    
+    
+    UILabel *label = [[UILabel alloc] initWithFrame:textLabelRect];
     label.numberOfLines = 0;
     NSMutableString *description = [NSMutableString new];
     
-    if (displayValue) {
-            [description appendString:displayValue];
-    }
-    
+    if (displayValue)
+        [description appendString:displayValue];
+
     label.text = description;
     label.textAlignment = NSTextAlignmentCenter;
     label.adjustsFontSizeToFitWidth = YES;
