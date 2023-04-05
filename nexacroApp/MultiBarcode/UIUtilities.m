@@ -19,9 +19,9 @@
 @import MLKit;
 
 static CGFloat const circleViewAlpha = 0.7;
-static CGFloat const rectangleViewAlpha = 0.3;
+//static CGFloat const rectangleViewAlpha = 0.3;
 static CGFloat const shapeViewAlpha = 0.3;
-static CGFloat const rectangleViewCornerRadius = 10.0;
+//static CGFloat const rectangleViewCornerRadius = 10.0;
 
 static NSString *const MLKCircleViewIdentifier = @"MLKit Circle View";
 static NSString *const MLKLineViewIdentifier = @"MLKit Line View";

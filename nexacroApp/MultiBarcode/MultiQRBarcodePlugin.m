@@ -107,6 +107,7 @@ const int MLKIT_FORMAT_ALL = 0xFFFF;
     
     multiQRBarcodeVC = [[MultiQRBarcodeViewController alloc]init];
     
+    
     /*
     BOOL useTextLabel    = [[dic valueForKey:@"useTextLabel"]   isEqualToString:@"true"];
     BOOL useAutoCapture  = [[dic valueForKey:@"useAutoCapture"] isEqualToString:@"true"];

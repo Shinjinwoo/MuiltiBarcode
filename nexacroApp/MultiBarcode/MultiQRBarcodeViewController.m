@@ -44,6 +44,9 @@ typedef NS_ENUM(NSInteger, Detector) {
 @property(nonatomic) CMSampleBufferRef lastFrame;
 
 
+@property(nonatomic, strong) AVAudioPlayer* avAudioPlayer;
+
+
 @property (weak, nonatomic) IBOutlet UIButton *cameraBtn;
 @property (weak, nonatomic) IBOutlet UIButton *backBtn;
 
@@ -227,11 +230,9 @@ typedef NS_ENUM(NSInteger, Detector) {
     
     //if ( [self grantCameraPermission] )
     [self startSession];
-    
     _timerStatus = YES;
     
     /*
-     
      1. 모듈 인스턴스 생성 - > 콜 메소드 ->
      2. ( viewDidLoad  [ onCreated() ] : UI 초기화 및 켑쳐 세션 초기화 ) ->
      3. ( viewDidApper [ onStart() ]   : 캡쳐 스타트 ) ->
@@ -240,14 +241,16 @@ typedef NS_ENUM(NSInteger, Detector) {
      6. 상기 함수에서 MLKBarcodeScanner 스캐너 인스턴스가 스캔결과를 MLKBarcode 인스턴스로 내보냄 ->
      7. 캡처 버튼 클릭시 스캔 결과인 MLKBarcode 인스턴스를 json 형식으로 매핑후 모듈로 전송
      8. 넥사크로로 리턴
-     
      */
 }
 
 - (void)viewDidDisappear:(BOOL)animated {
-    [super viewDidDisappear:animated];
     
+    //[_avAudioPlayer play];
+    
+    [super viewDidDisappear:animated];
     [self stopSession];
+    
 }
 
 - (void)viewSetPorfit {
@@ -307,8 +310,6 @@ typedef NS_ENUM(NSInteger, Detector) {
         [self startVibrate];
     // 진동기능
     
-    [self playSound];
-    
     [self dismissViewControllerAnimated:YES completion:nil];
     // 뷰 종료
 }
@@ -332,21 +333,19 @@ typedef NS_ENUM(NSInteger, Detector) {
 
 - (void) playSound {
     @try {
+
         NSError *error;
         // 음악 파일 경로 이름 ( Sample )
         NSString *soundFilePath = [[NSBundle mainBundle] pathForResource:@"scan_beep" ofType:@"mp3"];
         // URL로 변환
         NSURL *soundFileURL = [NSURL fileURLWithPath:soundFilePath];
         // AVAudioPlayer 객체 생성
-        AVAudioPlayer *player = [[AVAudioPlayer alloc] initWithContentsOfURL:soundFileURL error:&error];
+        _avAudioPlayer = [[AVAudioPlayer alloc] initWithContentsOfURL:soundFileURL error:&error];
         // 재생
-        
+
         if ( error == nil ){
-            [player prepareToPlay];
-            [player play];
-        }
-            
-        else {
+            [_avAudioPlayer play];
+        } else {
             [_multiQRBarcodePlugin sendEx:CODE_ERROR eventID:@"_oncallback" serviceID:SERVICE_ID
                                    andMsg:[NSString stringWithFormat:@"사운드 재생 실패 : %@",error.description]];
         }
@@ -354,8 +353,9 @@ typedef NS_ENUM(NSInteger, Detector) {
         [_multiQRBarcodePlugin sendEx:CODE_ERROR eventID:@"_oncallback" serviceID:SERVICE_ID
                                andMsg:[NSString stringWithFormat:@"사운드 재생 실패 : %@",exception.description]];
     } @finally {
-        return;
+
     }
+    
 }
 
 
@@ -479,8 +479,11 @@ typedef NS_ENUM(NSInteger, Detector) {
             return;
         }
 
+
+        bool test = false;
+        
         for (MLKBarcode *barcode in barcodes) {
-            
+
             CGRect normalizedRect = CGRectMake( barcode.frame.origin.x      / width,
                                                 barcode.frame.origin.y      / height,
                                                 barcode.frame.size.width    / width,
@@ -497,10 +500,7 @@ typedef NS_ENUM(NSInteger, Detector) {
             
             // 포커스 된 바코드 영역을 MLKit Result를 통해 화면에 그리는 UI 작업
             if ( self.isUseTextLabel == YES ) {
-                    
                 UILabel *textLabel = [self getTextLabelWithCGRect:standardizedRect withDisplayValue:barcode.displayValue];
-                
-                
                 [strongSelf.annotationOverlayView addSubview:textLabel];
             }
             
@@ -522,23 +522,27 @@ typedef NS_ENUM(NSInteger, Detector) {
                 }
                 
                 if ( _array.count >= self.limitCount ) {
-                    _alredySend = YES;
-                    if (self.isUseSoundEffect == YES)
-                        [self playSound];
-                    [self sendToMultiQRBarcodePlugin];
-                    // 넥사크로로 전송
-                    if ( self.isUseVibration == YES )
-                        [self startVibrate];
-                    // 진동기능
-                    [self dismissViewControllerAnimated:YES completion:nil];
-                    // 뷰 종료
+                    if ( _alredySend == NO ) {
+                        // 진동기능
+                        if ( self.isUseVibration == YES )
+                            [self startVibrate];
+                        
+                        //사운드
+                        if (self.isUseSoundEffect == YES)
+                            [self playSound];
+                        
+                        // 넥사크로로 전송
+                        [self sendToMultiQRBarcodePlugin];
+                        
+                        // 뷰 종료
+                        [self dismissViewControllerAnimated:YES completion:nil];
+                    
+                        _alredySend = YES;
+                        
+                    }
                 }
             }
         }
-        
-        
-        
-        
     });
 }
 
