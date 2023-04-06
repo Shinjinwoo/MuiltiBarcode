@@ -70,17 +70,20 @@ NS_ASSUME_NONNULL_BEGIN
 
 #pragma mark - 캡쳥영역 그리기
 + (void)addRectangle:(CGRect)rectangle toView:(UIView *)view color:(UIColor *)color {
-  UIView *rectangleView = [[UIView alloc] initWithFrame:rectangle];
     
-  rectangleView.layer.cornerRadius = 0;
+    
+    //CGRect rect = CGRectMake(rectangle.origin.x, rectangle.origin.y, rectangle.size.width, rectangle.size.height / 3);
+    
+    UIView *rectangleView = [[UIView alloc] initWithFrame:rectangle];
+    
+    rectangleView.layer.cornerRadius = 0;
   
-    
-  rectangleView.alpha = 0.7;
-  rectangleView.backgroundColor = [UIColor greenColor];
-    
-  rectangleView.isAccessibilityElement = YES;
-  rectangleView.accessibilityIdentifier = MLKRectangleViewIdentifier;
-    
+    rectangleView.alpha = 0.7;
+    rectangleView.backgroundColor = [UIColor greenColor];
+
+    rectangleView.isAccessibilityElement = YES;
+    rectangleView.accessibilityIdentifier = MLKRectangleViewIdentifier;
+
     // 안드로이드 UI 공통화용 코드
     // 기능 : Focused 된 영역에 보더라인 그리기
     CAShapeLayer *borderLayer = [[CAShapeLayer alloc] init];

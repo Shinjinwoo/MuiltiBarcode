@@ -145,6 +145,7 @@ const int MLKIT_FORMAT_ALL = 0xFFFF;
     else
         [multiQRBarcodeVC setIsUseVibration:NO];
     
+    
     #pragma mark  핀치줌 기능 Set [ 테스트 코드 ]
     bool usePinchZoom    = [dic boolValueForKey:@"usePinchZoom"];
     usePinchZoom = YES;
