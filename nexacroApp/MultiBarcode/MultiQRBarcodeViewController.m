@@ -605,13 +605,12 @@ static NSString *const sessionQueueLabel = @"com.google.mlkit.visiondetector.Ses
     
     UIDeviceOrientation orientation = [[UIDevice currentDevice] orientation];
     
-    if (orientation == UIDeviceOrientationLandscapeLeft || orientation == UIDeviceOrientationLandscapeRight )
-    {
-        NSMutableString *description = [NSMutableString new];
-        if (displayValue)
-            [description appendString:displayValue];
+    NSMutableString *description = [NSMutableString new];
+    if (displayValue)
+        [description appendString:displayValue];
+    
+    if (orientation == UIDeviceOrientationLandscapeLeft || orientation == UIDeviceOrientationLandscapeRight ) {
 
-        label.text = description;
         label.textColor = [UIColor blackColor];
         label.backgroundColor = [UIColor yellowColor];
         label.layer.borderWidth = 1.0;
@@ -620,7 +619,7 @@ static NSString *const sessionQueueLabel = @"com.google.mlkit.visiondetector.Ses
         label.adjustsFontSizeToFitWidth = YES;
         
         CATextLayer *textLayer = [[CATextLayer alloc] init];
-        textLayer.string = label.text;
+        textLayer.string = description;
         textLayer.fontSize = label.font.pointSize;
         textLayer.alignmentMode = kCAAlignmentCenter;
         textLayer.wrapped = YES;
@@ -636,10 +635,6 @@ static NSString *const sessionQueueLabel = @"com.google.mlkit.visiondetector.Ses
     } else {
         
         label.numberOfLines = 0;
-        NSMutableString *description = [NSMutableString new];
-        if (displayValue)
-            [description appendString:displayValue];
-
         label.text = description;
         label.textAlignment = NSTextAlignmentCenter;
         label.adjustsFontSizeToFitWidth = YES;
