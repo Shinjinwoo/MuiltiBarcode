@@ -188,11 +188,23 @@ static NSString *const sessionQueueLabel = @"com.google.mlkit.visiondetector.Ses
 
 #pragma mark - 토스트 메시지
 - (void)showToast:(NSString *)message withDuration:(double)duration delay:(double)delay {
-    UILabel *toastLabel = [[UILabel alloc] initWithFrame:CGRectMake(
-                                                                    self.cameraView.frame.size.width/2 - 37.5,
-                                                                    self.cameraView.frame.size.height-50,
-                                                                    75,
-                                                                    35)];
+    
+    
+    UIDeviceOrientation orientation = [[UIDevice currentDevice]orientation];
+    UILabel *toastLabel = [[UILabel alloc]init];
+    
+    if (orientation == UIDeviceOrientationLandscapeLeft || orientation == UIDeviceOrientationLandscapeRight ) {
+        toastLabel.frame = CGRectMake(  self.cameraView.frame.size.width/2 - 37.5 + 75,
+                                        self.cameraView.frame.size.height-50,
+                                        35,
+                                        75);
+    } else {
+        toastLabel.frame = CGRectMake(  self.cameraView.frame.size.width/2 - 37.5,
+                                        self.cameraView.frame.size.height-50,
+                                        75,
+                                        35);
+    }
+    
     
     toastLabel.backgroundColor = [[UIColor yellowColor] colorWithAlphaComponent:0.2];
     toastLabel.textColor = [UIColor blackColor];
@@ -583,46 +595,18 @@ static NSString *const sessionQueueLabel = @"com.google.mlkit.visiondetector.Ses
         }
     });
 }
+
 #pragma mark 텍스트 라벨 추가 함수
 -(UILabel*)getTextLabelWithCGRect :(CGRect) standardizedRect
                   withDisplayValue:(NSString*) displayValue {
     
-    CGRect textLabelRect;
-    UIDeviceOrientation orientation = [[UIDevice currentDevice] orientation];
-    
-    NSMutableAttributedString *attributedText = nil;
-    
-    if (orientation == UIDeviceOrientationLandscapeLeft || orientation == UIDeviceOrientationLandscapeRight ) {
-        textLabelRect = CGRectMake( standardizedRect.origin.x + standardizedRect.size.width,// X
-                                    standardizedRect.origin.y,                              // Y
-                                    20,                                                     // Width
-                                    standardizedRect.size.height / 2 );                     // Height
-        
-        attributedText = [[NSMutableAttributedString alloc] initWithString:displayValue];
-        [attributedText addAttribute:NSVerticalGlyphFormAttributeName value:@(1) range:NSMakeRange(0, displayValue.length)];
-
-        
-    } else {
-        textLabelRect = CGRectMake( standardizedRect.origin.x,          // X
-                                    standardizedRect.origin.y   - 20,   // Y
-                                    standardizedRect.size.width  / 2,   // Width
-                                    20 );                               // Height
-        /**
-         * 우측 박스 내부 상단에 텍스트 라벨 생성
-         CGRect textLabelRect = CGRectMake(  standardizedRect.origin.x + (standardizedRect.size.width  / 2),    // X
-                                             standardizedRect.origin.y,//   - 20,                               // Y
-                                             standardizedRect.size.width  / 2,                                  // Width
-                                             20 );                                                              // Height
-         */
-    }
-    
-    
-    
-    
+    CGRect textLabelRect = [self getRotatedCGRect:standardizedRect];
     UILabel *label = [[UILabel alloc] initWithFrame:textLabelRect];
     
+    UIDeviceOrientation orientation = [[UIDevice currentDevice] orientation];
+    
     if (orientation == UIDeviceOrientationLandscapeLeft || orientation == UIDeviceOrientationLandscapeRight )
-    {    
+    {
         NSMutableString *description = [NSMutableString new];
         if (displayValue)
             [description appendString:displayValue];
@@ -650,6 +634,7 @@ static NSString *const sessionQueueLabel = @"com.google.mlkit.visiondetector.Ses
         [layer addSublayer:textLayer];
 
     } else {
+        
         label.numberOfLines = 0;
         NSMutableString *description = [NSMutableString new];
         if (displayValue)
@@ -662,8 +647,38 @@ static NSString *const sessionQueueLabel = @"com.google.mlkit.visiondetector.Ses
         label.backgroundColor = [UIColor yellowColor];
         label.layer.borderWidth = 1.0;
         label.layer.borderColor = [UIColor yellowColor].CGColor;
+        
     }
     return label;
+}
+
+
+#pragma mark 텍스트 라벨 박스 사이즈 가로세로 대응
+-(CGRect) getRotatedCGRect :(CGRect) standardizedRect {
+    
+    CGRect textLabelRect;
+    UIDeviceOrientation orientation = [[UIDevice currentDevice] orientation];
+    
+    if (orientation == UIDeviceOrientationLandscapeLeft || orientation == UIDeviceOrientationLandscapeRight ) {
+        textLabelRect = CGRectMake( standardizedRect.origin.x + standardizedRect.size.width,// X
+                                    standardizedRect.origin.y,                              // Y
+                                    20,                                                     // Width
+                                    standardizedRect.size.height / 2 );                     // Height
+    } else {
+        textLabelRect = CGRectMake( standardizedRect.origin.x,          // X
+                                    standardizedRect.origin.y   - 20,   // Y
+                                    standardizedRect.size.width  / 2,   // Width
+                                    20 );                               // Height
+        /**
+         * 우측 박스 내부 상단에 텍스트 라벨 생성
+         CGRect textLabelRect = CGRectMake(  standardizedRect.origin.x + (standardizedRect.size.width  / 2),    // X
+                                             standardizedRect.origin.y,//   - 20,                               // Y
+                                             standardizedRect.size.width  / 2,                                  // Width
+                                             20 );                                                              // Height
+         */
+    }
+    
+    return textLabelRect;
 }
 
 
