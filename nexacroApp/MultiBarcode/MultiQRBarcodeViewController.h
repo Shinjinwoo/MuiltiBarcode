@@ -39,6 +39,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property bool isUseAutoCapture;
 @property bool isUseVibration;
 @property bool isUsePinchZoom;
+@property bool isUnlimitedTime;
 
 @property long selectingCount;
 @property NSInteger  barcodeFormat;

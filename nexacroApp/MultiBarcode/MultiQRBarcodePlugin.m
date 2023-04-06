@@ -215,8 +215,7 @@ const int MLKIT_FORMAT_ALL = 0xFFFF;
     #pragma mark 리미트 시간 Set
     if ( limitTime == 0 ) { // NSDic에서 값을 추출하지 못했을 경우 Default 값
         if ( useAutoCapture == YES ) {
-            [self send:CODE_ERROR withMsg:@"LimitTime is Null"];
-            return;
+            [multiQRBarcodeVC setIsUnlimitedTime:YES];
         } else {
             NSLog(@"%f",limitTime);
         }
@@ -230,8 +229,9 @@ const int MLKIT_FORMAT_ALL = 0xFFFF;
     #pragma mark  리미트 카운트 Set
     if ( limitCount == 0 ) { // NSDic에서 값을 추출하지 못했을 경우 Default 값
         if ( limitCount == 0 && useAutoCapture == YES ) {
+            
             [self send:CODE_ERROR withMsg:@"LimitCount is Null"];
-            return;
+            
         } else if ( limitCount < 1 && useAutoCapture == YES ) {
             [self send:CODE_ERROR withMsg:@"LimitCount more than 1"];
             return;

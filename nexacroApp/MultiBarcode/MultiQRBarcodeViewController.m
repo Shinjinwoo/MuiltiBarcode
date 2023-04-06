@@ -71,6 +71,7 @@ static NSString *const sessionQueueLabel = @"com.google.mlkit.visiondetector.Ses
 @synthesize zoomFactor;
 @synthesize boxColor;
 @synthesize isUsePinchZoom;
+@synthesize isUnlimitedTime;
 
 #pragma mark - UIInterfaceOrientationMask Portrait 고정
 - (UIInterfaceOrientationMask)supportedInterfaceOrientations {
@@ -94,14 +95,17 @@ static NSString *const sessionQueueLabel = @"com.google.mlkit.visiondetector.Ses
     
     [_cameraBtn setImage:[self setCaptureButtonImage] forState:UIControlStateNormal];
     
-    self.view.layer.shouldRasterize = YES;
-    self.view.layer.rasterizationScale = [UIScreen mainScreen].scale;
+//    self.view.layer.shouldRasterize = YES;
+//    self.view.layer.rasterizationScale = [UIScreen mainScreen].scale;
     
-    _cameraView.layer.shouldRasterize = YES;
-    _cameraView.layer.rasterizationScale = [UIScreen mainScreen].scale;
+//    _cameraView.layer.shouldRasterize = YES;
+//    _cameraView.layer.rasterizationScale = [UIScreen mainScreen].scale;
     
     self.view.backgroundColor = [UIColor blackColor];
-    _cameraView.backgroundColor = [UIColor blackColor];
+    _cameraView.backgroundColor = [UIColor whiteColor];
+    
+    
+    NSLog(@" 뷰 디드로드 카메라뷰 사이즈 %f, %f",_cameraView.frame.size.width,_cameraView.frame.size.height);
     
     _array = [[NSMutableArray alloc]init];
     _barcodeFormatTable = [[NSMutableDictionary alloc]init];
@@ -114,10 +118,11 @@ static NSString *const sessionQueueLabel = @"com.google.mlkit.visiondetector.Ses
     _previewOverlayView = [[UIImageView alloc] initWithFrame:CGRectZero];
     
     //_previewOverlayView.contentMode = UIViewContentModeScaleAspectFill;
-    _previewOverlayView.contentMode = UIViewContentModeScaleAspectFit;
+    _previewOverlayView.contentMode = UIViewContentModeScaleToFill;
     _previewOverlayView.translatesAutoresizingMaskIntoConstraints = NO;
     
     _annotationOverlayView = [[UIView alloc] initWithFrame:CGRectZero];
+    _annotationOverlayView.contentMode = UIViewContentModeScaleToFill;
     _annotationOverlayView.translatesAutoresizingMaskIntoConstraints = NO;
     
     self.previewLayer = [AVCaptureVideoPreviewLayer layerWithSession:_captureSession];
@@ -128,6 +133,8 @@ static NSString *const sessionQueueLabel = @"com.google.mlkit.visiondetector.Ses
     [self setUpAnnotationOverlayView];
     [self setUpCaptureSessionOutput];
     [self setUpCaptureSessionInput];
+    
+    NSLog(@" 뷰 디드로드 후  카메라뷰 사이즈 %f, %f",_cameraView.frame.size.width,_cameraView.frame.size.height);
     
     if ( self.isUsePinchZoom == YES )
     {
@@ -234,10 +241,14 @@ static NSString *const sessionQueueLabel = @"com.google.mlkit.visiondetector.Ses
     [super viewDidAppear:animated];
     
     //if ( [self grantCameraPermission] )
+    
+    NSLog(@" startSession 전  카메라뷰 사이즈 %f, %f",_cameraView.frame.size.width,_cameraView.frame.size.height);
+    
     [self startSession];
     _timerStatus = YES;
     
     
+    NSLog(@" startSession 후  카메라뷰 사이즈 %f, %f",_cameraView.frame.size.width,_cameraView.frame.size.height);
     
     /*
      1. 모듈 인스턴스 생성 - > 콜 메소드 ->
@@ -252,16 +263,17 @@ static NSString *const sessionQueueLabel = @"com.google.mlkit.visiondetector.Ses
 }
 
 - (void)viewDidDisappear:(BOOL)animated {
-    
     [super viewDidDisappear:animated];
     [self stopSession];
-    
 }
 
 - (void)viewDidLayoutSubviews {
     [super viewDidLayoutSubviews];
     
-    _previewLayer.frame = _cameraView.frame;
+    
+    _previewLayer.frame = _cameraView.frame;;
+    
+    NSLog(@" viewDidLayoutSubviews 사이즈 %f, %f",_cameraView.frame.size.width,_cameraView.frame.size.height);
     
 }
 
@@ -368,7 +380,6 @@ static NSString *const sessionQueueLabel = @"com.google.mlkit.visiondetector.Ses
         [_multiQRBarcodePlugin send:CODE_ERROR withMsg:@"Count Set is null"];
     else {
         @try {
-            
             NSMutableDictionary *frequencyCounts = [self getFrequencyCountsDic];
             NSArray *sortedKeys = [self sortedMutableArrayByDuplicateValue:_array];
             NSString *mostFrequentElement = [sortedKeys lastObject];
@@ -433,7 +444,6 @@ static NSString *const sessionQueueLabel = @"com.google.mlkit.visiondetector.Ses
                             options:(MLKBarcodeScannerOptions *)options {
     
     MLKBarcodeScanner *scanner = [MLKBarcodeScanner barcodeScannerWithOptions:options];
-    // '스캐너 옵션'을 기준으로 '스캐너' 인스턴스 생성
     
     NSError *error;
     NSArray<MLKBarcode *> *barcodes = [scanner resultsInImage:image error:&error];
@@ -465,7 +475,7 @@ static NSString *const sessionQueueLabel = @"com.google.mlkit.visiondetector.Ses
 
         
         for (MLKBarcode *barcode in barcodes) {
-
+            
             CGRect normalizedRect = CGRectMake( barcode.frame.origin.x      / width,
                                                 barcode.frame.origin.y      / height,
                                                 barcode.frame.size.width    / width,
@@ -498,7 +508,7 @@ static NSString *const sessionQueueLabel = @"com.google.mlkit.visiondetector.Ses
             [_array addObject:barcode.displayValue];
             
             if ( isUseAutoCapture == YES ) {
-                if ( _timerStatus == YES ) {
+                if ( _timerStatus == YES  && isUnlimitedTime == NO) {
                     _timerStatus = NO;
                     [self startTimer];
                 }
@@ -576,11 +586,12 @@ static NSString *const sessionQueueLabel = @"com.google.mlkit.visiondetector.Ses
         
         
         //strongSelf.captureSession.sessionPreset = AVCaptureSessionPresetMedium;
+        //strongSelf.captureSession.sessionPreset = AVCaptureSessionPresetHigh;
+        
+        strongSelf.captureSession.sessionPreset = AVCaptureSessionPreset3200x2400;
         //strongSelf.captureSession.sessionPreset = AVCaptureSessionPreset640x480;
         //strongSelf.captureSession.sessionPreset = AVCaptureSessionPreset1920x1080;
         //strongSelf.captureSession.sessionPreset = AVCaptureSessionPreset3840x2160;
-        
-        strongSelf.captureSession.sessionPreset = AVCaptureSessionPreset1280x720;
         
         
         AVCaptureVideoDataOutput *output = [[AVCaptureVideoDataOutput alloc] init];
@@ -760,40 +771,32 @@ static NSString *const sessionQueueLabel = @"com.google.mlkit.visiondetector.Ses
 }
 #pragma mark - 카메라 화면영역
 - (void)setUpPreviewOverlayView {
-
-    //_previewOverlayView.frame = _cameraView.bounds;
-
     [_cameraView addSubview:_previewOverlayView];
-    
     [NSLayoutConstraint activateConstraints:@[
         [_previewOverlayView.centerYAnchor  constraintEqualToAnchor:_cameraView.centerYAnchor],
         [_previewOverlayView.centerXAnchor  constraintEqualToAnchor:_cameraView.centerXAnchor],
         //[_previewOverlayView.leadingAnchor  constraintEqualToAnchor:_cameraView.leadingAnchor],
-        //[_previewOverlayView.trailingAnchor constraintEqualToAnchor:_cameraView.trailingAnchor],
-        [_previewOverlayView.leftAnchor constraintEqualToAnchor:self.view.leftAnchor],
-        [_previewOverlayView.rightAnchor constraintEqualToAnchor:self.view.rightAnchor],
+        [_previewOverlayView.leftAnchor constraintEqualToAnchor:_cameraView.leftAnchor],
+        [_previewOverlayView.rightAnchor constraintEqualToAnchor:_cameraView.rightAnchor],
+        [_previewOverlayView.topAnchor constraintEqualToAnchor:_cameraView.topAnchor],
         [_previewOverlayView.bottomAnchor constraintEqualToAnchor:_cameraView.bottomAnchor],
-        [_previewOverlayView.topAnchor constraintEqualToAnchor:_cameraView.topAnchor]
+        [_previewOverlayView.widthAnchor constraintEqualToAnchor:_cameraView.widthAnchor],
+        [_previewOverlayView.heightAnchor constraintEqualToAnchor:_cameraView.heightAnchor]
+        
     ]];
-    
-//    [_previewOverlayView.centerXAnchor constraintEqualToAnchor:_cameraView.centerXAnchor].active = YES;
-//    [_previewOverlayView.topAnchor constraintEqualToAnchor:_cameraView.topAnchor].active = YES;
-//    [_previewOverlayView.leadingAnchor constraintEqualToAnchor:_cameraView.leadingAnchor].active = YES;
-//    [_previewOverlayView.bottomAnchor constraintEqualToAnchor:_cameraView.bottomAnchor].active = YES;
-    
-//    [_previewOverlayView.centerXAnchor constraintEqualToAnchor:_cameraView.centerXAnchor].active = YES;
-//    [_previewOverlayView.centerYAnchor constraintEqualToAnchor:_cameraView.centerYAnchor].active = YES;
-    
 }
 
 #pragma mark - 박스영역
 - (void)setUpAnnotationOverlayView {
     [_cameraView addSubview:_annotationOverlayView];
+    NSLog(@" setUpAnnotationOverlayView 카메라뷰 사이즈 %f, %f",_cameraView.frame.size.width,_cameraView.frame.size.height);
     [NSLayoutConstraint activateConstraints:@[
         [_annotationOverlayView.topAnchor      constraintEqualToAnchor:_cameraView.topAnchor],
         [_annotationOverlayView.leadingAnchor  constraintEqualToAnchor:_cameraView.leadingAnchor],
         [_annotationOverlayView.trailingAnchor constraintEqualToAnchor:_cameraView.trailingAnchor],
         [_annotationOverlayView.bottomAnchor   constraintEqualToAnchor:_cameraView.bottomAnchor]
+        
+        
     ]];
 }
 
@@ -836,42 +839,6 @@ static NSString *const sessionQueueLabel = @"com.google.mlkit.visiondetector.Ses
     _previewOverlayView.image = image;
 }
 
-- (UIImage *)resizeImage:(UIImage *)image {
-    CGFloat targetHeight = image.size.width / 4.0 * 3.0; // 4:3 비율 높이
-    CGSize targetSize = CGSizeMake(image.size.width, targetHeight);
-    UIGraphicsBeginImageContext(targetSize);
-    [image drawInRect:CGRectMake(0, 0, targetSize.width, targetSize.height)];
-    UIImage *resizedImage = UIGraphicsGetImageFromCurrentImageContext();
-    UIGraphicsEndImageContext();
-    return resizedImage;
-}
-
-- (void)rotateView:(UIView *)view orientation:(UIImageOrientation)orientation {
-    CGFloat degree = 0.0;
-    switch (orientation) {
-        case UIImageOrientationUp:
-            break;
-        case UIImageOrientationUpMirrored:
-            degree = 90.0;
-            break;
-        case UIImageOrientationRightMirrored:
-        case UIImageOrientationLeft:
-            degree = 180.0;
-            
-            break;
-        case UIImageOrientationDown:
-        case UIImageOrientationDownMirrored:
-            degree = 270.0;
-            
-            break;
-        case UIImageOrientationLeftMirrored:
-        case UIImageOrientationRight:
-            degree = 0.0;
-            break;
-    }
-    view.transform = CGAffineTransformMakeRotation(degree * 3.141592654 / 180);
-}
-
 
 #pragma mark - 캡쳐영역 ( AVCaptureVideoDataOutputSampleBufferDelegate )
 
@@ -879,6 +846,8 @@ static NSString *const sessionQueueLabel = @"com.google.mlkit.visiondetector.Ses
 didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
        fromConnection:(AVCaptureConnection *)connection {
     CVImageBufferRef imageBuffer = CMSampleBufferGetImageBuffer(sampleBuffer);
+    
+    
     // AVCaptureVideoDataOutputSampleBuffer 델리게이트를 통해 실시간으로 캡쳐된 동영상의 프레임을 버퍼로 해당 뷰컨트롤러에 받는다
     // AVCaptureVideoDataOutputSampleBufferDelegate 는 video data output 에서 sample buffer를 받아오며, 받아오는 video data output의 상태를 감시한다.
     if (imageBuffer) {
@@ -903,8 +872,7 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
         
         
         MLKBarcodeScannerOptions *options = [[MLKBarcodeScannerOptions alloc]
-                                             initWithFormats:
-                                                 self.barcodeFormat ];
+                                             initWithFormats: self.barcodeFormat ];
         
         [self scanBarcodesOnDeviceInImage:visionImage
                                     width:imageWidth

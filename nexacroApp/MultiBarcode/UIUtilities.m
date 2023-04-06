@@ -188,12 +188,16 @@ NS_ASSUME_NONNULL_BEGIN
 
 + (UIImage *)UIImageFromImageBuffer:(CVImageBufferRef)imageBuffer
                         orientation:(UIImageOrientation)orientation {
+    
   CIImage *CIImg = [CIImage imageWithCVPixelBuffer:imageBuffer];
   CIContext *context = [[CIContext alloc] initWithOptions:nil];
   CGImageRef CGImg = [context createCGImage:CIImg fromRect:CIImg.extent];
   UIImage *image = [UIImage imageWithCGImage:CGImg scale:1.0f orientation:orientation];
   CGImageRelease(CGImg);
+    
+    
   return image;
+    
 }
 
 + (CVImageBufferRef)imageBufferFromUIImage:(UIImage *)image {
