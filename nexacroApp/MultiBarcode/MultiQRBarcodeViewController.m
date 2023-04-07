@@ -204,10 +204,12 @@ static NSString *const sessionQueueLabel = @"com.google.mlkit.visiondetector.Ses
     UILabel *toastLabel = [[UILabel alloc]init];
     
     if (orientation == UIDeviceOrientationLandscapeLeft || orientation == UIDeviceOrientationLandscapeRight ) {
-        toastLabel.frame = CGRectMake(  self.cameraView.frame.size.width/2 - 37.5 + 75,
-                                        self.cameraView.frame.size.height-50,
-                                        35,
-                                        75);
+        toastLabel.frame = CGRectMake(  self.previewOverlayView.frame.origin.x,
+                                        self.previewOverlayView.frame.size.height/2,
+                                        75,
+                                        35);
+        //toastLabel.transform = CGAffineTransformMakeRotation(M_PI_2);
+        
     } else {
         toastLabel.frame = CGRectMake(  self.cameraView.frame.size.width/2 - 37.5,
                                         self.cameraView.frame.size.height-50,
@@ -445,7 +447,6 @@ static NSString *const sessionQueueLabel = @"com.google.mlkit.visiondetector.Ses
         
         __strong typeof(weakSelf) strongSelf = weakSelf;
         
-        
         [strongSelf removeDetectionAnnotations];
         [strongSelf updatePreviewOverlayViewWithLastFrame];
         // UI 작업등을 라스트 프레임에 업데이트 한다
@@ -457,12 +458,8 @@ static NSString *const sessionQueueLabel = @"com.google.mlkit.visiondetector.Ses
         }
         
         if (barcodes.count == 0) {
-            //NSLog(@"On-Device barcode scanner returned no results.");
-            //실시간으로 캡쳐된 바코드의 값이 존재하지 않을때 로그를 표시 했으나 개발단계에서도 너무 많은 로그량이 찍혀서 주석처리
             return;
         }
-
-
         
         for (MLKBarcode *barcode in barcodes) {
             
@@ -494,8 +491,14 @@ static NSString *const sessionQueueLabel = @"com.google.mlkit.visiondetector.Ses
                 @"displayValue" : barcode.displayValue
             };
             
-            [_barcodeFormatTable setValue:qrBarcodeInfoDic forKey:barcode.displayValue];
-            [_array addObject:barcode.displayValue];
+            //[_barcodeFormatTable setValue:qrBarcodeInfoDic forKey:barcode.displayValue];
+            [_barcodeFormatTable setValue:qrBarcodeInfoDic forKey:barcode.rawValue];
+            
+            //[_array addObject:barcode.displayValue];
+            [_array addObject:barcode.rawValue];
+            
+            
+            NSLog(@"%lu",_array.count);
             
             if ( isUseAutoCapture == YES ) {
                 if ( _timerStatus == YES  && isUnlimitedTime == NO) {
@@ -579,9 +582,9 @@ static NSString *const sessionQueueLabel = @"com.google.mlkit.visiondetector.Ses
         //strongSelf.captureSession.sessionPreset = AVCaptureSessionPresetHigh;
         
         //strongSelf.captureSession.sessionPreset = AVCaptureSessionPreset3200x2400;
-        //strongSelf.captureSession.sessionPreset = AVCaptureSessionPreset640x480;
+        strongSelf.captureSession.sessionPreset = AVCaptureSessionPreset640x480;
         //strongSelf.captureSession.sessionPreset = AVCaptureSessionPreset1920x1080;
-        strongSelf.captureSession.sessionPreset = AVCaptureSessionPreset3840x2160;
+        //strongSelf.captureSession.sessionPreset = AVCaptureSessionPreset3840x2160;
         
         
         AVCaptureVideoDataOutput *output = [[AVCaptureVideoDataOutput alloc] init];
@@ -667,6 +670,7 @@ static NSString *const sessionQueueLabel = @"com.google.mlkit.visiondetector.Ses
     UIDeviceOrientation orientation = [[UIDevice currentDevice] orientation];
     
     if (orientation == UIDeviceOrientationLandscapeLeft || orientation == UIDeviceOrientationLandscapeRight ) {
+        
         textLabelRect = CGRectMake( standardizedRect.origin.x + standardizedRect.size.width,// X
                                     standardizedRect.origin.y,                              // Y
                                     20,                                                     // Width
@@ -677,7 +681,8 @@ static NSString *const sessionQueueLabel = @"com.google.mlkit.visiondetector.Ses
                                     standardizedRect.size.width  / 2,   // Width
                                     20 );                               // Height
         /**
-         * 우측 박스 내부 상단에 텍스트 라벨 생성
+         *
+         우측 박스 내부 상단에 텍스트 라벨 생성
          CGRect textLabelRect = CGRectMake(  standardizedRect.origin.x + (standardizedRect.size.width  / 2),    // X
                                              standardizedRect.origin.y,//   - 20,                               // Y
                                              standardizedRect.size.width  / 2,                                  // Width
@@ -759,6 +764,7 @@ static NSString *const sessionQueueLabel = @"com.google.mlkit.visiondetector.Ses
         [weakSelf.captureSession stopRunning];
     });
 }
+
 #pragma mark - 카메라 화면영역
 - (void)setUpPreviewOverlayView {
     [_cameraView addSubview:_previewOverlayView];
