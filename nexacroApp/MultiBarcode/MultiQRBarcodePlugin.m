@@ -49,8 +49,7 @@ const int MLKIT_FORMAT_ALL = 0xFFFF;
 
 -(void)callMethod:(NSString*)lid withDict:(NSMutableDictionary*)options {
     [self printArgs:[NSString stringWithUTF8String:__func__] arg:options];
-    
-    
+
     self.nID = [lid integerValue];
     
     NSDictionary *dic = [options dicValueForKey:@"param"];

@@ -325,25 +325,6 @@ static NSString *const sessionQueueLabel = @"com.google.mlkit.visiondetector.Ses
 }
 
 
-
-#pragma mark - 배열 요소별 누적 된 횟수 구하는 로직
-- (NSMutableDictionary*) getFrequencyCountsDic {
-    
-    NSMutableDictionary *frequencyCounts = [NSMutableDictionary dictionary];
-    
-    for (id element in _array) {
-        NSNumber *count = frequencyCounts[element];
-        if (count == nil) {
-            count = @(0);
-        }
-        count = @(count.intValue + 1);
-        frequencyCounts[element] = count;
-    }
-    
-    return frequencyCounts;
-}
-
-
 #pragma mark - 넥사크로로 전송
 - (void) sendToMultiQRBarcodePlugin {
     
@@ -408,50 +389,6 @@ static NSString *const sessionQueueLabel = @"com.google.mlkit.visiondetector.Ses
     }
 }
 
-#pragma mark - MLKit 스캔결과
-- (void)scanBarcodesOnDeviceInImage:(MLKVisionImage *)image
-                              width:(CGFloat)width
-                             height:(CGFloat)height
-                            options:(MLKBarcodeScannerOptions *)options {
-    
-    MLKBarcodeScanner *scanner = [MLKBarcodeScanner barcodeScannerWithOptions:options];
-    
-    NSError *error;
-    NSArray<MLKBarcode *> *barcodes = [scanner resultsInImage:image error:&error];
-    
-    
-    __weak typeof(self) weakSelf = self;
-    dispatch_sync(dispatch_get_main_queue(), ^{
-        // UI Thread에서 사용한다.
-        
-        __strong typeof(weakSelf) strongSelf = weakSelf;
-        
-        [strongSelf removeDetectionAnnotations];
-        [strongSelf updatePreviewOverlayViewWithLastFrame];
-        // UI 작업등을 라스트 프레임에 업데이트 한다
-        
-        if (error != nil) {
-            NSLog(@"Failed to scan barcodes with error: %@", error.localizedDescription);
-            [_multiQRBarcodePlugin sendEx:CODE_ERROR eventID:@"_oncallback" serviceID:SERVICE_ID andMsg:error.localizedDescription];
-            return;
-        }
-        
-        if (barcodes.count == 0)
-            return;
-
-        
-        for (MLKBarcode *barcode in barcodes) {
-            [self drawBarcodeAreaWithBarcodeObject:barcode
-                                             width:width
-                                            height:height];
-
-            [self countBarcode:barcode];
-            if ( isUseAutoCapture == YES )
-                [ self autoScaningProcess ];
-
-        }
-    });
-}
 
 
 
@@ -476,7 +413,24 @@ static NSString *const sessionQueueLabel = @"com.google.mlkit.visiondetector.Ses
     
 }
 
-//중복된 값 카운팅 후 정렬 함수
+// 배열 요소별 누적 된 횟수 구하는 로직
+- (NSMutableDictionary*) getFrequencyCountsDic {
+    
+    NSMutableDictionary *frequencyCounts = [NSMutableDictionary dictionary];
+    
+    for (id element in _array) {
+        NSNumber *count = frequencyCounts[element];
+        if (count == nil) {
+            count = @(0);
+        }
+        count = @(count.intValue + 1);
+        frequencyCounts[element] = count;
+    }
+    
+    return frequencyCounts;
+}
+
+// 중복된 값 카운팅 후 정렬 함수
 - (NSArray*)sortedMutableArrayByDuplicateValue : (NSMutableArray*) array {
     
     NSCountedSet *countedSet = [[NSCountedSet alloc]initWithArray:array];
@@ -539,7 +493,8 @@ static NSString *const sessionQueueLabel = @"com.google.mlkit.visiondetector.Ses
 
 
 
-#pragma mark - 캡쳐세션 설정 [ 해상도 및 초기 설정 ]
+#pragma mark - 캡쳐세션
+//캡쳐세션 아웃풋 설정 [ 해상도 및 초기 설정 ]
 - (void)setUpCaptureSessionOutput {
     __weak typeof(self) weakSelf = self;
     dispatch_async(_sessionQueue, ^{
@@ -700,6 +655,50 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
     });
 }
 
+#pragma mark MLKit 스캔결과
+- (void)scanBarcodesOnDeviceInImage:(MLKVisionImage *)image
+                              width:(CGFloat)width
+                             height:(CGFloat)height
+                            options:(MLKBarcodeScannerOptions *)options {
+    
+    MLKBarcodeScanner *scanner = [MLKBarcodeScanner barcodeScannerWithOptions:options];
+    
+    NSError *error;
+    NSArray<MLKBarcode *> *barcodes = [scanner resultsInImage:image error:&error];
+    
+    
+    __weak typeof(self) weakSelf = self;
+    dispatch_sync(dispatch_get_main_queue(), ^{
+        // UI Thread에서 사용한다.
+        
+        __strong typeof(weakSelf) strongSelf = weakSelf;
+        
+        [strongSelf removeDetectionAnnotations];
+        [strongSelf updatePreviewOverlayViewWithLastFrame];
+        // UI 작업등을 라스트 프레임에 업데이트 한다
+        
+        if (error != nil) {
+            NSLog(@"Failed to scan barcodes with error: %@", error.localizedDescription);
+            [_multiQRBarcodePlugin sendEx:CODE_ERROR eventID:@"_oncallback" serviceID:SERVICE_ID andMsg:error.localizedDescription];
+            return;
+        }
+        
+        if (barcodes.count == 0)
+            return;
+
+        
+        for (MLKBarcode *barcode in barcodes) {
+            [self drawBarcodeAreaWithBarcodeObject:barcode
+                                             width:width
+                                            height:height];
+
+            [self countBarcode:barcode];
+            if ( isUseAutoCapture == YES )
+                [ self autoScaningProcess ];
+
+        }
+    });
+}
 
 
 #pragma mark - UI 영역
