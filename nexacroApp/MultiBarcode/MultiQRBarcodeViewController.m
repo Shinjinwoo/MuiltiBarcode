@@ -463,27 +463,12 @@ static NSString *const sessionQueueLabel = @"com.google.mlkit.visiondetector.Ses
         
         for (MLKBarcode *barcode in barcodes) {
             
-            CGRect normalizedRect = CGRectMake( barcode.frame.origin.x      / width,
-                                                barcode.frame.origin.y      / height,
-                                                barcode.frame.size.width    / width,
-                                                barcode.frame.size.height   / height);
             
-            CGRect standardizedRect = CGRectStandardize( [strongSelf.previewLayer rectForMetadataOutputRectOfInterest:normalizedRect] );
-            
-            // 카메라 화면을 기준으로 박스의 비율을 '상대적'으로 계산
-            [UIUtilities addRectangle:standardizedRect
-                               toView:strongSelf.annotationOverlayView
-                                //color:UIColor.greenColor
-                                color:self.boxColor];
+            [self drawBarcodeAreaWithBarcodeObject:barcode
+                                             width:width
+                                            height:height];
             
             
-            // 포커스 된 바코드 영역을 MLKit Result를 통해 화면에 그리는 UI 작업
-            if ( self.isUseTextLabel == YES ) {
-                UILabel *textLabel = [self getTextLabelWithCGRect:standardizedRect withDisplayValue:barcode.displayValue];
-                [strongSelf.annotationOverlayView addSubview:textLabel];
-            }
-            
-            // 포커스된 바코드영역에 텍스트 라벨을 화면에 그리는 UI 작업
             NSDictionary *qrBarcodeInfoDic = @{
                 @"format"    : [NSString stringWithFormat:@"%ld",(long)barcode.format],
                 @"rawValue"  : barcode.rawValue,
@@ -498,7 +483,6 @@ static NSString *const sessionQueueLabel = @"com.google.mlkit.visiondetector.Ses
             [_array addObject:barcode.rawValue];
             
             
-            NSLog(@"%lu",_array.count);
             
             if ( isUseAutoCapture == YES ) {
                 if ( _timerStatus == YES  && isUnlimitedTime == NO) {
@@ -548,6 +532,35 @@ static NSString *const sessionQueueLabel = @"com.google.mlkit.visiondetector.Ses
         [self sendToMultiQRBarcodePlugin];
         [self dismissViewControllerAnimated:YES completion:nil];
     }
+}
+
+#pragma mark - 바코드 박스 및 라벨 네이티브 UI작업 함수
+- (void) drawBarcodeAreaWithBarcodeObject : (MLKBarcode*)barcode
+                                     width: (CGFloat)width
+                                    height: (CGFloat)height {
+    
+    __strong typeof(self) strongSelf = self;
+    
+    CGRect normalizedRect = CGRectMake( barcode.frame.origin.x      / width,
+                                        barcode.frame.origin.y      / height,
+                                        barcode.frame.size.width    / width,
+                                        barcode.frame.size.height   / height);
+    
+    CGRect standardizedRect = CGRectStandardize( [strongSelf.previewLayer rectForMetadataOutputRectOfInterest:normalizedRect] );
+    
+    // 카메라 화면을 기준으로 박스의 비율을 '상대적'으로 계산
+    [UIUtilities addRectangle:standardizedRect
+                       toView:strongSelf.annotationOverlayView
+                        //color:UIColor.greenColor
+                        color:self.boxColor];
+    
+    
+    // 포커스 된 바코드 영역을 MLKit Result를 통해 화면에 그리는 UI 작업
+    if ( self.isUseTextLabel == YES ) {
+        UILabel *textLabel = [self getTextLabelWithCGRect:standardizedRect withDisplayValue:barcode.displayValue];
+        [strongSelf.annotationOverlayView addSubview:textLabel];
+    }
+    
 }
 
 #pragma mark - 중복된 값 카운팅 후 정렬 함수
