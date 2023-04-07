@@ -45,6 +45,9 @@ static NSString *const sessionQueueLabel = @"com.google.mlkit.visiondetector.Ses
 
 @property(nonatomic) NSMutableArray *array;
 @property(nonatomic) NSMutableDictionary *barcodeFormatTable;
+//@property(nonatomic) NSMutableSet *barcodeFormatTable;
+
+
 @property(nonatomic) NSMutableDictionary *sendToPluginDic;
 @property(nonatomic) NSMutableArray *returnArray;
 @property(nonatomic) NSMutableDictionary *barcodeInfoDic;
@@ -457,59 +460,19 @@ static NSString *const sessionQueueLabel = @"com.google.mlkit.visiondetector.Ses
             return;
         }
         
-        if (barcodes.count == 0) {
+        if (barcodes.count == 0)
             return;
-        }
+
         
         for (MLKBarcode *barcode in barcodes) {
-            
-            
             [self drawBarcodeAreaWithBarcodeObject:barcode
                                              width:width
                                             height:height];
-            
-            
-            NSDictionary *qrBarcodeInfoDic = @{
-                @"format"    : [NSString stringWithFormat:@"%ld",(long)barcode.format],
-                @"rawValue"  : barcode.rawValue,
-                @"displayValueType" : [NSString stringWithFormat:@"%ld",(long)barcode.valueType],
-                @"displayValue" : barcode.displayValue
-            };
-            
-            //[_barcodeFormatTable setValue:qrBarcodeInfoDic forKey:barcode.displayValue];
-            [_barcodeFormatTable setValue:qrBarcodeInfoDic forKey:barcode.rawValue];
-            
-            //[_array addObject:barcode.displayValue];
-            [_array addObject:barcode.rawValue];
-            
-            
-            
-            if ( isUseAutoCapture == YES ) {
-                if ( _timerStatus == YES  && isUnlimitedTime == NO) {
-                    _timerStatus = NO;
-                    [self startTimer];
-                }
-                
-                if ( _array.count >= self.limitCount ) {
-                    if ( _alredySend == NO ) {
-                        // 진동기능
-                        if ( self.isUseVibration == YES )
-                            [self startVibrate];
-                        
-                        //사운드
-                        if (self.isUseSoundEffect == YES)
-                            [self playSound];
-                        
-                        // 넥사크로로 전송
-                        [self sendToMultiQRBarcodePlugin];
-                        
-                        // 뷰 종료
-                        [self dismissViewControllerAnimated:YES completion:nil];
-                        _alredySend = YES;
-                        
-                    }
-                }
-            }
+
+            [self countBarcode:barcode];
+            if ( isUseAutoCapture == YES )
+                [ self autoScaningProcess ];
+
         }
     });
 }
@@ -534,7 +497,55 @@ static NSString *const sessionQueueLabel = @"com.google.mlkit.visiondetector.Ses
     }
 }
 
-#pragma mark - 바코드 박스 및 라벨 네이티브 UI작업 함수
+
+#pragma mark - 바코드 카운팅 로직
+- (void) countBarcode : (MLKBarcode*)barcode {
+    
+    NSDictionary *qrBarcodeInfoDic = @{
+        @"format"           : [NSString stringWithFormat:@"%ld",(long)barcode.format],
+        @"rawValue"         : barcode.rawValue,
+        @"displayValueType" : [NSString stringWithFormat:@"%ld",(long)barcode.valueType],
+        @"displayValue"     : barcode.displayValue
+    };
+    
+    //[_barcodeFormatTable setValue:qrBarcodeInfoDic forKey:barcode.displayValue];
+    [_barcodeFormatTable setValue:qrBarcodeInfoDic forKey:barcode.rawValue];
+    
+    //NSLog(@"%@",_barcodeFormatTable);
+    //[_array addObject:barcode.displayValue];
+    [_array addObject:barcode.rawValue];
+    
+}
+
+#pragma mark - 오토스캔 로직
+- (void) autoScaningProcess {
+        if ( _timerStatus == YES  && isUnlimitedTime == NO) {
+            _timerStatus = NO;
+            [self startTimer];
+        }
+        
+        if ( _array.count >= self.limitCount ) {
+            if ( _alredySend == NO ) {
+                // 진동기능
+                if ( self.isUseVibration == YES )
+                    [self startVibrate];
+                
+                //사운드
+                if (self.isUseSoundEffect == YES)
+                    [self playSound];
+                
+                // 넥사크로로 전송
+                [self sendToMultiQRBarcodePlugin];
+                
+                // 뷰 종료
+                [self dismissViewControllerAnimated:YES completion:nil];
+                _alredySend = YES;
+            }
+        }
+    }
+
+
+#pragma mark - 바코드 박스 및 라벨 UI 작업
 - (void) drawBarcodeAreaWithBarcodeObject : (MLKBarcode*)barcode
                                      width: (CGFloat)width
                                     height: (CGFloat)height {
