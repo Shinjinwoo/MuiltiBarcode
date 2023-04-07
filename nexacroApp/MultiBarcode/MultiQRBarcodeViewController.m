@@ -82,12 +82,13 @@ static NSString *const sessionQueueLabel = @"com.google.mlkit.visiondetector.Ses
 }
 
 
-#pragma mark - viewDidLoad
+#pragma mark - view관련 생명주기
 - (void)viewDidLoad {
     
     [super viewDidLoad];
     
     _alredySend = NO;
+    _timerStatus = YES;
     
     if (self.boxColor == nil )
         self.boxColor = UIColor.yellowColor;
@@ -97,12 +98,6 @@ static NSString *const sessionQueueLabel = @"com.google.mlkit.visiondetector.Ses
     _multiQRBarcodePlugin = rootVC.multiQRBarcodePlugin;
     
     [_cameraBtn setImage:[self setCaptureButtonImage] forState:UIControlStateNormal];
-    
-//    self.view.layer.shouldRasterize = YES;
-//    self.view.layer.rasterizationScale = [UIScreen mainScreen].scale;
-    
-//    _cameraView.layer.shouldRasterize = YES;
-//    _cameraView.layer.rasterizationScale = [UIScreen mainScreen].scale;
     
     self.view.backgroundColor = [UIColor blackColor];
     _cameraView.backgroundColor = [UIColor whiteColor];
@@ -145,6 +140,21 @@ static NSString *const sessionQueueLabel = @"com.google.mlkit.visiondetector.Ses
     }
 }
 
+- (void)viewDidAppear:(BOOL)animated {
+    [super viewDidAppear:animated];
+    [self startSession];
+}
+
+- (void)viewDidDisappear:(BOOL)animated {
+    [super viewDidDisappear:animated];
+    [self stopSession];
+}
+
+- (void)viewDidLayoutSubviews {
+    [super viewDidLayoutSubviews];
+    _previewLayer.frame = _cameraView.frame;;
+    
+}
 
 #pragma mark - 캡쳐버튼 UI 처리
 -(UIImage*)setCaptureButtonImage {
@@ -160,13 +170,13 @@ static NSString *const sessionQueueLabel = @"com.google.mlkit.visiondetector.Ses
     return largeBoldDoc;
 }
 
-#pragma mark - 진동 기능
+#pragma mark - 기능단위 정리
+
 - (void)startVibrate {
         AudioServicesPlaySystemSound(kSystemSoundID_Vibrate);
 }
 
 
-#pragma mark - 핀치 줌
 - (void)handlePinchGesture:(UIPinchGestureRecognizer *)pinch {
     CGFloat initialScale = _device.videoZoomFactor;
     CGFloat minAvailableZoomScale = 1.0;
@@ -199,7 +209,6 @@ static NSString *const sessionQueueLabel = @"com.google.mlkit.visiondetector.Ses
     }
 }
 
-#pragma mark - 핀치줌 변경시 토스트 메시지
 - (void)showToast:(NSString *)message withDuration:(double)duration delay:(double)delay {
     
     
@@ -240,36 +249,30 @@ static NSString *const sessionQueueLabel = @"com.google.mlkit.visiondetector.Ses
     }];
 }
 
-#pragma mark - viewDidAppear
-- (void)viewDidAppear:(BOOL)animated {
-    [super viewDidAppear:animated];
-    
-    [self startSession];
-    _timerStatus = YES;
-    
-    
-    /*
-     1. 모듈 인스턴스 생성 - > 콜 메소드 ->
-     2. ( viewDidLoad  [ onCreated() ] : UI 초기화 및 켑쳐 세션 초기화 ) ->
-     3. ( viewDidApper [ onStart() ]   : 캡쳐 스타트 ) ->
-     4. ( AVCaptureVideoDataOutputSampleBufferDelegate  : 해당 델리게이터를 통해 마지막 프레임에 이미지 버퍼를 받아옴 ) ->
-     5. ( scanBarcodesOnDeviceInImage 함수를 통해 마지막 버퍼의 이미지를 분석 ) ->
-     6. 상기 함수에서 MLKBarcodeScanner 스캐너 인스턴스가 스캔결과를 MLKBarcode 인스턴스로 내보냄 ->
-     7. 캡처 버튼 클릭시 스캔 결과인 MLKBarcode 인스턴스를 json 형식으로 매핑후 모듈로 전송
-     8. 넥사크로로 리턴
-     */
-}
+- (void) playSound {
+    @try {
 
-- (void)viewDidDisappear:(BOOL)animated {
-    [super viewDidDisappear:animated];
-    [self stopSession];
-}
+        NSError *error;
+        // 음악 파일 경로 이름 ( Sample )
+        NSString *soundFilePath = [[NSBundle mainBundle] pathForResource:@"scan_beep" ofType:@"mp3"];
+        // URL로 변환
+        NSURL *soundFileURL = [NSURL fileURLWithPath:soundFilePath];
+        // AVAudioPlayer 객체 생성
+        _avAudioPlayer = [[AVAudioPlayer alloc] initWithContentsOfURL:soundFileURL error:&error];
+        // 재생
 
-- (void)viewDidLayoutSubviews {
-    [super viewDidLayoutSubviews];
-    
-    _previewLayer.frame = _cameraView.frame;;
-    
+        if ( error == nil )
+            [_avAudioPlayer play];
+        else
+            [_multiQRBarcodePlugin sendEx:CODE_ERROR eventID:@"_oncallback" serviceID:SERVICE_ID
+                                   andMsg:[NSString stringWithFormat:@"사운드 재생 실패 : %@",error.description]];
+        
+    } @catch (NSException *exception) {
+        [_multiQRBarcodePlugin sendEx:CODE_ERROR eventID:@"_oncallback" serviceID:SERVICE_ID
+                               andMsg:[NSString stringWithFormat:@"사운드 재생 실패 : %@",exception.description]];
+    } @finally {
+        
+    }
 }
 
 
@@ -321,33 +324,6 @@ static NSString *const sessionQueueLabel = @"com.google.mlkit.visiondetector.Ses
     }
 }
 
-#pragma mark - 사운드 재생
-
-- (void) playSound {
-    @try {
-
-        NSError *error;
-        // 음악 파일 경로 이름 ( Sample )
-        NSString *soundFilePath = [[NSBundle mainBundle] pathForResource:@"scan_beep" ofType:@"mp3"];
-        // URL로 변환
-        NSURL *soundFileURL = [NSURL fileURLWithPath:soundFilePath];
-        // AVAudioPlayer 객체 생성
-        _avAudioPlayer = [[AVAudioPlayer alloc] initWithContentsOfURL:soundFileURL error:&error];
-        // 재생
-
-        if ( error == nil )
-            [_avAudioPlayer play];
-        else
-            [_multiQRBarcodePlugin sendEx:CODE_ERROR eventID:@"_oncallback" serviceID:SERVICE_ID
-                                   andMsg:[NSString stringWithFormat:@"사운드 재생 실패 : %@",error.description]];
-        
-    } @catch (NSException *exception) {
-        [_multiQRBarcodePlugin sendEx:CODE_ERROR eventID:@"_oncallback" serviceID:SERVICE_ID
-                               andMsg:[NSString stringWithFormat:@"사운드 재생 실패 : %@",exception.description]];
-    } @finally {
-        
-    }
-}
 
 
 #pragma mark - 배열 요소별 누적 된 횟수 구하는 로직
@@ -477,28 +453,11 @@ static NSString *const sessionQueueLabel = @"com.google.mlkit.visiondetector.Ses
     });
 }
 
-#pragma mark - 타이머 시작
--(void)startTimer {
-    NSString *userInfo = @"AutoScan Timer Start";
-    [NSTimer scheduledTimerWithTimeInterval:self.limitTime target:self selector:@selector(timerFire:) userInfo:userInfo repeats:NO];
-}
-
-#pragma mark - 타이머 핸들러
--(void)timerFire:(NSTimer*)timer {
-    if (_alredySend == NO) {
-        if (self.isUseSoundEffect == YES)
-            [self playSound];
-        
-        if ( self.isUseVibration == YES )
-            [self startVibrate];
-        // 진동기능
-        [self sendToMultiQRBarcodePlugin];
-        [self dismissViewControllerAnimated:YES completion:nil];
-    }
-}
 
 
-#pragma mark - 바코드 카운팅 로직
+#pragma mark - 로직단위
+
+//바코드 카운팅
 - (void) countBarcode : (MLKBarcode*)barcode {
     
     NSDictionary *qrBarcodeInfoDic = @{
@@ -517,7 +476,21 @@ static NSString *const sessionQueueLabel = @"com.google.mlkit.visiondetector.Ses
     
 }
 
-#pragma mark - 오토스캔 로직
+//중복된 값 카운팅 후 정렬 함수
+- (NSArray*)sortedMutableArrayByDuplicateValue : (NSMutableArray*) array {
+    
+    NSCountedSet *countedSet = [[NSCountedSet alloc]initWithArray:array];
+    
+    NSArray *sortedArray = [[countedSet allObjects] sortedArrayUsingComparator:^NSComparisonResult(id obj1, id obj2) {
+        NSUInteger count1 = [countedSet countForObject:obj1];
+        NSUInteger count2 = [countedSet countForObject:obj2];
+        return count1 - count2;
+    }];
+    
+    return sortedArray;
+}
+
+//오토 스캔
 - (void) autoScaningProcess {
         if ( _timerStatus == YES  && isUnlimitedTime == NO) {
             _timerStatus = NO;
@@ -544,50 +517,26 @@ static NSString *const sessionQueueLabel = @"com.google.mlkit.visiondetector.Ses
         }
     }
 
+// 타미어 시작
+-(void)startTimer {
+    NSString *userInfo = @"AutoScan Timer Start";
+    [NSTimer scheduledTimerWithTimeInterval:self.limitTime target:self selector:@selector(timerFire:) userInfo:userInfo repeats:NO];
+}
 
-#pragma mark - 바코드 박스 및 라벨 UI 작업
-- (void) drawBarcodeAreaWithBarcodeObject : (MLKBarcode*)barcode
-                                     width: (CGFloat)width
-                                    height: (CGFloat)height {
-    
-    __strong typeof(self) strongSelf = self;
-    
-    CGRect normalizedRect = CGRectMake( barcode.frame.origin.x      / width,
-                                        barcode.frame.origin.y      / height,
-                                        barcode.frame.size.width    / width,
-                                        barcode.frame.size.height   / height);
-    
-    CGRect standardizedRect = CGRectStandardize( [strongSelf.previewLayer rectForMetadataOutputRectOfInterest:normalizedRect] );
-    
-    // 카메라 화면을 기준으로 박스의 비율을 '상대적'으로 계산
-    [UIUtilities addRectangle:standardizedRect
-                       toView:strongSelf.annotationOverlayView
-                        //color:UIColor.greenColor
-                        color:self.boxColor];
-    
-    
-    // 포커스 된 바코드 영역을 MLKit Result를 통해 화면에 그리는 UI 작업
-    if ( self.isUseTextLabel == YES ) {
-        UILabel *textLabel = [self getTextLabelWithCGRect:standardizedRect withDisplayValue:barcode.displayValue];
-        [strongSelf.annotationOverlayView addSubview:textLabel];
+// 타이머 핸들러
+-(void)timerFire:(NSTimer*)timer {
+    if (_alredySend == NO) {
+        if (self.isUseSoundEffect == YES)
+            [self playSound];
+        
+        if ( self.isUseVibration == YES )
+            [self startVibrate];
+        // 진동기능
+        [self sendToMultiQRBarcodePlugin];
+        [self dismissViewControllerAnimated:YES completion:nil];
     }
-    
 }
 
-#pragma mark - 중복된 값 카운팅 후 정렬 함수
-
-- (NSArray*)sortedMutableArrayByDuplicateValue : (NSMutableArray*) array {
-    
-    NSCountedSet *countedSet = [[NSCountedSet alloc]initWithArray:array];
-    
-    NSArray *sortedArray = [[countedSet allObjects] sortedArrayUsingComparator:^NSComparisonResult(id obj1, id obj2) {
-        NSUInteger count1 = [countedSet countForObject:obj1];
-        NSUInteger count2 = [countedSet countForObject:obj2];
-        return count1 - count2;
-    }];
-    
-    return sortedArray;
-}
 
 
 #pragma mark - 캡쳐세션 설정 [ 해상도 및 초기 설정 ]
@@ -604,7 +553,6 @@ static NSString *const sessionQueueLabel = @"com.google.mlkit.visiondetector.Ses
         
         //strongSelf.captureSession.sessionPreset = AVCaptureSessionPresetMedium;
         //strongSelf.captureSession.sessionPreset = AVCaptureSessionPresetHigh;
-        
         //strongSelf.captureSession.sessionPreset = AVCaptureSessionPreset3200x2400;
         strongSelf.captureSession.sessionPreset = AVCaptureSessionPreset640x480;
         //strongSelf.captureSession.sessionPreset = AVCaptureSessionPreset1920x1080;
@@ -632,6 +580,154 @@ static NSString *const sessionQueueLabel = @"com.google.mlkit.visiondetector.Ses
             NSLog(@"%@", @"Failed to add capture session output.");
         }
     });
+}
+
+#pragma mark 캡쳐세션 input 설정 [ 줌 & 전면,후면 카레라 설정 ]
+- (void)setUpCaptureSessionInput {
+    __weak typeof(self) weakSelf = self;
+    dispatch_async(_sessionQueue, ^{
+        __strong typeof(weakSelf) strongSelf = weakSelf;
+        if (strongSelf == nil) {
+            NSLog(@"Failed to setUpCaptureSessionInput because self was deallocated");
+            return;
+        }
+        
+        
+        AVCaptureDevicePosition cameraPosition = strongSelf.isUseFrontCamera ? AVCaptureDevicePositionFront : AVCaptureDevicePositionBack;
+        //AVCaptureDevice *device = [strongSelf captureDeviceForPosition:cameraPosition];
+        
+        strongSelf.device = [strongSelf captureDeviceForPosition:cameraPosition];
+        // 카메라 인스턴스 생성
+        
+        if (strongSelf.device) {
+            [strongSelf.captureSession beginConfiguration];
+            NSArray<AVCaptureInput *> *currentInputs = strongSelf.captureSession.inputs;
+            for (AVCaptureInput *input in currentInputs) {
+                [strongSelf.captureSession removeInput:input];
+            }
+            NSError *error;
+            AVCaptureDeviceInput *input = [AVCaptureDeviceInput deviceInputWithDevice:weakSelf.device
+                                                                                error:&error];
+            if (error) {
+                NSLog(@"Failed to create capture device input: %@", error.localizedDescription);
+                return;
+            } else {
+                if ([strongSelf.captureSession canAddInput:input]) {
+                    [strongSelf.captureSession addInput:input];
+                    if ([strongSelf.device lockForConfiguration:&error]) {
+                        
+                        if ( strongSelf.device.maxAvailableVideoZoomFactor <= self.zoomFactor )
+                            strongSelf.device.videoZoomFactor = strongSelf.device.maxAvailableVideoZoomFactor;
+                         else if ( weakSelf.device.minAvailableVideoZoomFactor >= self.zoomFactor )
+                             strongSelf.device.videoZoomFactor = strongSelf.device.minAvailableVideoZoomFactor;
+                         else
+                             strongSelf.device.videoZoomFactor = self.zoomFactor;
+                        
+                        
+                        [strongSelf.device unlockForConfiguration];
+                    } else {
+                        NSLog(@"%@",[error description]);
+                    }
+                } else {
+                    NSLog(@"%@", @"Failed to add capture session input.");
+                }
+            }
+            [strongSelf.captureSession commitConfiguration];
+        } else {
+            NSLog(@"Failed to get capture device for camera position: %ld", cameraPosition);
+        }
+    });
+}
+
+
+#pragma mark  캡쳐세션을 통해 데이터를 받는 델리게이트 ( AVCaptureVideoDataOutputSampleBufferDelegate )
+
+- (void)captureOutput:(AVCaptureOutput *)output
+didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
+       fromConnection:(AVCaptureConnection *)connection {
+    CVImageBufferRef imageBuffer = CMSampleBufferGetImageBuffer(sampleBuffer);
+    
+    
+    // AVCaptureVideoDataOutputSampleBuffer 델리게이트를 통해 실시간으로 캡쳐된 동영상의 프레임을 버퍼로 해당 뷰컨트롤러에 받는다
+    // AVCaptureVideoDataOutputSampleBufferDelegate 는 video data output 에서 sample buffer를 받아오며, 받아오는 video data output의 상태를 감시한다.
+    if (imageBuffer) {
+        _lastFrame = sampleBuffer;
+        
+        // 프레임 단위로 버퍼에 들어가서 이미지를 분석한다.
+        MLKVisionImage *visionImage = [[MLKVisionImage alloc] initWithBuffer:sampleBuffer];
+        // 마지막 버퍼를 기준으로 비전이미지 인스턴스 생성
+        // 비전 이미지 : 비전 감지에 사용되는 이미지 또는 이미지 버퍼
+        
+        UIImageOrientation orientation = [UIUtilities
+                                          imageOrientationFromDevicePosition:isUseFrontCamera ? AVCaptureDevicePositionFront
+                                          : AVCaptureDevicePositionBack];
+        
+        //디바이스의 회전방향을 참조해서 이미지 방향을 가져온다.
+        visionImage.orientation = orientation;
+        // 비전 이미지 방향설정
+        
+        CGFloat imageWidth = CVPixelBufferGetWidth(imageBuffer);
+        CGFloat imageHeight = CVPixelBufferGetHeight(imageBuffer);
+        // 버퍼를 통해 이미지 가로세로 길이 Get
+        
+        
+        MLKBarcodeScannerOptions *options = [[MLKBarcodeScannerOptions alloc]
+                                             initWithFormats: self.barcodeFormat ];
+        
+        [self scanBarcodesOnDeviceInImage:visionImage
+                                    width:imageWidth
+                                   height:imageHeight
+                                  options:options];
+    } else {
+        NSLog(@"%@", @"Failed to get image buffer from sample buffer.");
+    }
+}
+
+
+// 캡쳐세션 스타트
+- (void)startSession {
+    __weak typeof(self) weakSelf = self;
+    dispatch_async(_sessionQueue, ^{
+        [weakSelf.captureSession startRunning];
+    });
+}
+
+// 캡쳐세션 스탑
+- (void)stopSession {
+    __weak typeof(self) weakSelf = self;
+    dispatch_async(_sessionQueue, ^{
+        [weakSelf.captureSession stopRunning];
+    });
+}
+
+
+
+#pragma mark - UI 영역
+
+//박스영역
+- (void)setUpAnnotationOverlayView {
+    [_cameraView addSubview:_annotationOverlayView];
+    [NSLayoutConstraint activateConstraints:@[
+        [_annotationOverlayView.topAnchor      constraintEqualToAnchor  :_cameraView.topAnchor      ],
+        [_annotationOverlayView.leadingAnchor  constraintEqualToAnchor  :_cameraView.leadingAnchor  ],
+        [_annotationOverlayView.trailingAnchor constraintEqualToAnchor  :_cameraView.trailingAnchor ],
+        [_annotationOverlayView.bottomAnchor   constraintEqualToAnchor  :_cameraView.bottomAnchor   ]
+    ]];
+}
+
+//카메라 화면영역
+- (void)setUpPreviewOverlayView {
+    [_cameraView addSubview:_previewOverlayView];
+    [NSLayoutConstraint activateConstraints:@[
+        [_previewOverlayView.centerYAnchor  constraintEqualToAnchor :_cameraView.centerYAnchor  ],
+        [_previewOverlayView.centerXAnchor  constraintEqualToAnchor :_cameraView.centerXAnchor  ],
+        [_previewOverlayView.leftAnchor     constraintEqualToAnchor :_cameraView.leftAnchor     ],
+        [_previewOverlayView.rightAnchor    constraintEqualToAnchor :_cameraView.rightAnchor    ],
+        [_previewOverlayView.topAnchor      constraintEqualToAnchor :_cameraView.topAnchor      ],
+        [_previewOverlayView.bottomAnchor   constraintEqualToAnchor :_cameraView.bottomAnchor   ],
+        [_previewOverlayView.widthAnchor    constraintEqualToAnchor :_cameraView.widthAnchor    ],
+        [_previewOverlayView.heightAnchor   constraintEqualToAnchor :_cameraView.heightAnchor   ]
+    ]];
 }
 
 #pragma mark 텍스트 라벨 추가 함수
@@ -716,108 +812,6 @@ static NSString *const sessionQueueLabel = @"com.google.mlkit.visiondetector.Ses
     
     return textLabelRect;
 }
-
-
-#pragma mark 카메라 인스턴스 ( Zoom 관련 )
-- (void)setUpCaptureSessionInput {
-    __weak typeof(self) weakSelf = self;
-    dispatch_async(_sessionQueue, ^{
-        __strong typeof(weakSelf) strongSelf = weakSelf;
-        if (strongSelf == nil) {
-            NSLog(@"Failed to setUpCaptureSessionInput because self was deallocated");
-            return;
-        }
-        
-        
-        AVCaptureDevicePosition cameraPosition = strongSelf.isUseFrontCamera ? AVCaptureDevicePositionFront : AVCaptureDevicePositionBack;
-        //AVCaptureDevice *device = [strongSelf captureDeviceForPosition:cameraPosition];
-        
-        strongSelf.device = [strongSelf captureDeviceForPosition:cameraPosition];
-        // 카메라 인스턴스 생성
-        
-        if (strongSelf.device) {
-            [strongSelf.captureSession beginConfiguration];
-            NSArray<AVCaptureInput *> *currentInputs = strongSelf.captureSession.inputs;
-            for (AVCaptureInput *input in currentInputs) {
-                [strongSelf.captureSession removeInput:input];
-            }
-            NSError *error;
-            AVCaptureDeviceInput *input = [AVCaptureDeviceInput deviceInputWithDevice:weakSelf.device
-                                                                                error:&error];
-            if (error) {
-                NSLog(@"Failed to create capture device input: %@", error.localizedDescription);
-                return;
-            } else {
-                if ([strongSelf.captureSession canAddInput:input]) {
-                    [strongSelf.captureSession addInput:input];
-                    if ([strongSelf.device lockForConfiguration:&error]) {
-                        
-                        if ( strongSelf.device.maxAvailableVideoZoomFactor <= self.zoomFactor )
-                            strongSelf.device.videoZoomFactor = strongSelf.device.maxAvailableVideoZoomFactor;
-                         else if ( weakSelf.device.minAvailableVideoZoomFactor >= self.zoomFactor )
-                             strongSelf.device.videoZoomFactor = strongSelf.device.minAvailableVideoZoomFactor;
-                         else
-                             strongSelf.device.videoZoomFactor = self.zoomFactor;
-                        
-                        
-                        [strongSelf.device unlockForConfiguration];
-                    } else {
-                        NSLog(@"%@",[error description]);
-                    }
-                } else {
-                    NSLog(@"%@", @"Failed to add capture session input.");
-                }
-            }
-            [strongSelf.captureSession commitConfiguration];
-        } else {
-            NSLog(@"Failed to get capture device for camera position: %ld", cameraPosition);
-        }
-    });
-}
-
-- (void)startSession {
-    __weak typeof(self) weakSelf = self;
-    dispatch_async(_sessionQueue, ^{
-        [weakSelf.captureSession startRunning];
-    });
-}
-
-- (void)stopSession {
-    __weak typeof(self) weakSelf = self;
-    dispatch_async(_sessionQueue, ^{
-        [weakSelf.captureSession stopRunning];
-    });
-}
-
-#pragma mark - 카메라 화면영역
-- (void)setUpPreviewOverlayView {
-    [_cameraView addSubview:_previewOverlayView];
-    [NSLayoutConstraint activateConstraints:@[
-        [_previewOverlayView.centerYAnchor  constraintEqualToAnchor:_cameraView.centerYAnchor],
-        [_previewOverlayView.centerXAnchor  constraintEqualToAnchor:_cameraView.centerXAnchor],
-        //[_previewOverlayView.leadingAnchor  constraintEqualToAnchor:_cameraView.leadingAnchor],
-        [_previewOverlayView.leftAnchor constraintEqualToAnchor:_cameraView.leftAnchor],
-        [_previewOverlayView.rightAnchor constraintEqualToAnchor:_cameraView.rightAnchor],
-        [_previewOverlayView.topAnchor constraintEqualToAnchor:_cameraView.topAnchor],
-        [_previewOverlayView.bottomAnchor constraintEqualToAnchor:_cameraView.bottomAnchor],
-        [_previewOverlayView.widthAnchor constraintEqualToAnchor:_cameraView.widthAnchor],
-        [_previewOverlayView.heightAnchor constraintEqualToAnchor:_cameraView.heightAnchor]
-        
-    ]];
-}
-
-#pragma mark - 박스영역
-- (void)setUpAnnotationOverlayView {
-    [_cameraView addSubview:_annotationOverlayView];
-    
-    [NSLayoutConstraint activateConstraints:@[
-        [_annotationOverlayView.topAnchor      constraintEqualToAnchor:_cameraView.topAnchor],
-        [_annotationOverlayView.leadingAnchor  constraintEqualToAnchor:_cameraView.leadingAnchor],
-        [_annotationOverlayView.trailingAnchor constraintEqualToAnchor:_cameraView.trailingAnchor],
-        [_annotationOverlayView.bottomAnchor   constraintEqualToAnchor:_cameraView.bottomAnchor]
-    ]];
-}
-
 - (AVCaptureDevice *)captureDeviceForPosition:(AVCaptureDevicePosition)position {
     if (@available(iOS 10, *)) {
         AVCaptureDeviceDiscoverySession *discoverySession = [AVCaptureDeviceDiscoverySession
@@ -834,18 +828,19 @@ static NSString *const sessionQueueLabel = @"com.google.mlkit.visiondetector.Ses
 }
 
 
+//이전 프레임에 작성된 UI작업 삭제
 - (void)removeDetectionAnnotations {
     for (UIView *annotationView in _annotationOverlayView.subviews) {
         [annotationView removeFromSuperview];
     }
 }
 
+#pragma mark  캡쳐세션에서 새로이 인식된 이미지 버퍼로 UI 재호출
 - (void)updatePreviewOverlayViewWithLastFrame {
     CVImageBufferRef imageBuffer = CMSampleBufferGetImageBuffer(_lastFrame);
     [self updatePreviewOverlayViewWithImageBuffer:imageBuffer];
 }
 
-#pragma mark - 캡쳐영역 ( 이미지 버퍼 )
 - (void)updatePreviewOverlayViewWithImageBuffer:(CVImageBufferRef)imageBuffer {
     if (imageBuffer == nil) {
         return;
@@ -857,47 +852,31 @@ static NSString *const sessionQueueLabel = @"com.google.mlkit.visiondetector.Ses
     _previewOverlayView.image = image;
 }
 
-
-#pragma mark - 캡쳐영역 ( AVCaptureVideoDataOutputSampleBufferDelegate )
-
-- (void)captureOutput:(AVCaptureOutput *)output
-didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
-       fromConnection:(AVCaptureConnection *)connection {
-    CVImageBufferRef imageBuffer = CMSampleBufferGetImageBuffer(sampleBuffer);
+#pragma mark  바코드 박스 및 라벨 UI 작업
+- (void) drawBarcodeAreaWithBarcodeObject : (MLKBarcode*)barcode
+                                     width: (CGFloat)width
+                                    height: (CGFloat)height {
+    
+    __strong typeof(self) strongSelf = self;
+    
+    CGRect normalizedRect = CGRectMake( barcode.frame.origin.x      / width,
+                                        barcode.frame.origin.y      / height,
+                                        barcode.frame.size.width    / width,
+                                        barcode.frame.size.height   / height);
+    
+    CGRect standardizedRect = CGRectStandardize( [strongSelf.previewLayer rectForMetadataOutputRectOfInterest:normalizedRect] );
+    
+    // 카메라 화면을 기준으로 박스의 비율을 '상대적'으로 계산
+    [UIUtilities addRectangle:standardizedRect
+                       toView:strongSelf.annotationOverlayView
+                        //color:UIColor.greenColor
+                        color:self.boxColor];
     
     
-    // AVCaptureVideoDataOutputSampleBuffer 델리게이트를 통해 실시간으로 캡쳐된 동영상의 프레임을 버퍼로 해당 뷰컨트롤러에 받는다
-    // AVCaptureVideoDataOutputSampleBufferDelegate 는 video data output 에서 sample buffer를 받아오며, 받아오는 video data output의 상태를 감시한다.
-    if (imageBuffer) {
-        _lastFrame = sampleBuffer;
-        
-        // 프레임 단위로 버퍼에 들어가서 이미지를 분석한다.
-        MLKVisionImage *visionImage = [[MLKVisionImage alloc] initWithBuffer:sampleBuffer];
-        // 마지막 버퍼를 기준으로 비전이미지 인스턴스 생성
-        // 비전 이미지 : 비전 감지에 사용되는 이미지 또는 이미지 버퍼
-        
-        UIImageOrientation orientation = [UIUtilities
-                                          imageOrientationFromDevicePosition:isUseFrontCamera ? AVCaptureDevicePositionFront
-                                          : AVCaptureDevicePositionBack];
-        
-        //디바이스의 회전방향을 참조해서 이미지 방향을 가져온다.
-        visionImage.orientation = orientation;
-        // 비전 이미지 방향설정
-        
-        CGFloat imageWidth = CVPixelBufferGetWidth(imageBuffer);
-        CGFloat imageHeight = CVPixelBufferGetHeight(imageBuffer);
-        // 버퍼를 통해 이미지 가로세로 길이 Get
-        
-        
-        MLKBarcodeScannerOptions *options = [[MLKBarcodeScannerOptions alloc]
-                                             initWithFormats: self.barcodeFormat ];
-        
-        [self scanBarcodesOnDeviceInImage:visionImage
-                                    width:imageWidth
-                                   height:imageHeight
-                                  options:options];
-    } else {
-        NSLog(@"%@", @"Failed to get image buffer from sample buffer.");
+    // 포커스 된 바코드 영역을 MLKit Result를 통해 화면에 그리는 UI 작업
+    if ( self.isUseTextLabel == YES ) {
+        UILabel *textLabel = [self getTextLabelWithCGRect:standardizedRect withDisplayValue:barcode.displayValue];
+        [strongSelf.annotationOverlayView addSubview:textLabel];
     }
 }
 

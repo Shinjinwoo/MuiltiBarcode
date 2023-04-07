@@ -40,15 +40,8 @@ const int MLKIT_FORMAT_ALL = 0xFFFF;
 
     rootViewController.multiQRBarcodePlugin = self;
     
-    //test
-
     self = (MultiQRBarcodePlugin*)
     [super initWithWebView:theWebView];
-    
-    
-    NSLog(@"yellowColor : %@",[self uiColorToARGB:[UIColor yellowColor]]);
-    NSLog(@"grayColor   : %@",[self uiColorToARGB:[UIColor grayColor]]);
-    NSLog(@"blackColor  : %@",[self uiColorToARGB:[UIColor blackColor]]);
     
     return self;
 }
@@ -76,8 +69,7 @@ const int MLKIT_FORMAT_ALL = 0xFFFF;
 }
 
 -(void) sendEx:(int)reason1 eventID: (NSString*)eventID serviceID:(NSString*) svcId andMsg:(NSString*)retval {
-    @try
-    {
+    @try {
         NSMutableDictionary *mdic = [[NSMutableDictionary alloc] init];
         [mdic setObject:[NSNumber numberWithInt:reason1] forKey:REASON];
         
@@ -119,13 +111,13 @@ const int MLKIT_FORMAT_ALL = 0xFFFF;
     */
     
     BOOL useFrontCamera  = [self getConvertedBoolComparedToAndroid:[dic valueForKey:@"switchToFrontCamera"]];
-    BOOL useTextLabel    = [dic boolValueForKey:@"useTextLabel"];
-    BOOL useAutoCapture  = [dic boolValueForKey:@"useAutoCapture"];
-    BOOL useSound        = [dic boolValueForKey:@"useSound"];
+    BOOL useTextLabel    = [dic boolValueForKey:@"useTextLabel"     ];
+    BOOL useAutoCapture  = [dic boolValueForKey:@"useAutoCapture"   ];
+    BOOL useSound        = [dic boolValueForKey:@"useSound"         ];
     
-    CGFloat zoomFactor   = [[dic valueForKey:@"zoomFactor"] floatValue];
-    CGFloat limitTime    = [[dic valueForKey:@"limitTime"]  floatValue];
-    long limitCount      = [[dic valueForKey:@"limitCount"] longLongValue];
+    CGFloat zoomFactor   = [[dic valueForKey:@"zoomFactor"] floatValue      ];
+    CGFloat limitTime    = [[dic valueForKey:@"limitTime"]  floatValue      ];
+    long limitCount      = [[dic valueForKey:@"limitCount"] longLongValue   ];
     
     NSArray *setBarcodeFormat = [dic arryValueForKey:@"setScanFormat"];
     
@@ -229,9 +221,7 @@ const int MLKIT_FORMAT_ALL = 0xFFFF;
     #pragma mark  리미트 카운트 Set
     if ( limitCount == 0 ) { // NSDic에서 값을 추출하지 못했을 경우 Default 값
         if ( limitCount == 0 && useAutoCapture == YES ) {
-            
             [self send:CODE_ERROR withMsg:@"LimitCount is Null"];
-            
         } else if ( limitCount < 1 && useAutoCapture == YES ) {
             [self send:CODE_ERROR withMsg:@"LimitCount more than 1"];
             return;
