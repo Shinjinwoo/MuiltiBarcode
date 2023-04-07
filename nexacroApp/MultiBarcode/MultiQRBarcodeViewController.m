@@ -104,9 +104,6 @@ static NSString *const sessionQueueLabel = @"com.google.mlkit.visiondetector.Ses
     self.view.backgroundColor = [UIColor blackColor];
     _cameraView.backgroundColor = [UIColor whiteColor];
     
-    
-    NSLog(@" 뷰 디드로드 카메라뷰 사이즈 %f, %f",_cameraView.frame.size.width,_cameraView.frame.size.height);
-    
     _array = [[NSMutableArray alloc]init];
     _barcodeFormatTable = [[NSMutableDictionary alloc]init];
     _barcodeInfoDic = [[NSMutableDictionary alloc]init];
@@ -126,6 +123,10 @@ static NSString *const sessionQueueLabel = @"com.google.mlkit.visiondetector.Ses
     _annotationOverlayView.translatesAutoresizingMaskIntoConstraints = NO;
     
     self.previewLayer = [AVCaptureVideoPreviewLayer layerWithSession:_captureSession];
+    
+    //self.previewLayer.videoGravity = AVLayerVideoGravityResizeAspectFill;
+    self.previewLayer.videoGravity = AVLayerVideoGravityResize;
+    
     self.previewLayer.connection.videoOrientation = AVCaptureVideoOrientationPortrait;
     //self.previewLayer.connection.videoOrientation = AVCaptureVideoOrientationLandscapeLeft
     
@@ -133,8 +134,6 @@ static NSString *const sessionQueueLabel = @"com.google.mlkit.visiondetector.Ses
     [self setUpAnnotationOverlayView];
     [self setUpCaptureSessionOutput];
     [self setUpCaptureSessionInput];
-    
-    NSLog(@" 뷰 디드로드 후  카메라뷰 사이즈 %f, %f",_cameraView.frame.size.width,_cameraView.frame.size.height);
     
     if ( self.isUsePinchZoom == YES )
     {
@@ -240,15 +239,9 @@ static NSString *const sessionQueueLabel = @"com.google.mlkit.visiondetector.Ses
 - (void)viewDidAppear:(BOOL)animated {
     [super viewDidAppear:animated];
     
-    //if ( [self grantCameraPermission] )
-    
-    NSLog(@" startSession 전  카메라뷰 사이즈 %f, %f",_cameraView.frame.size.width,_cameraView.frame.size.height);
-    
     [self startSession];
     _timerStatus = YES;
     
-    
-    NSLog(@" startSession 후  카메라뷰 사이즈 %f, %f",_cameraView.frame.size.width,_cameraView.frame.size.height);
     
     /*
      1. 모듈 인스턴스 생성 - > 콜 메소드 ->
@@ -270,10 +263,7 @@ static NSString *const sessionQueueLabel = @"com.google.mlkit.visiondetector.Ses
 - (void)viewDidLayoutSubviews {
     [super viewDidLayoutSubviews];
     
-    
     _previewLayer.frame = _cameraView.frame;;
-    
-    NSLog(@" viewDidLayoutSubviews 사이즈 %f, %f",_cameraView.frame.size.width,_cameraView.frame.size.height);
     
 }
 
@@ -588,10 +578,10 @@ static NSString *const sessionQueueLabel = @"com.google.mlkit.visiondetector.Ses
         //strongSelf.captureSession.sessionPreset = AVCaptureSessionPresetMedium;
         //strongSelf.captureSession.sessionPreset = AVCaptureSessionPresetHigh;
         
-        strongSelf.captureSession.sessionPreset = AVCaptureSessionPreset3200x2400;
+        //strongSelf.captureSession.sessionPreset = AVCaptureSessionPreset3200x2400;
         //strongSelf.captureSession.sessionPreset = AVCaptureSessionPreset640x480;
         //strongSelf.captureSession.sessionPreset = AVCaptureSessionPreset1920x1080;
-        //strongSelf.captureSession.sessionPreset = AVCaptureSessionPreset3840x2160;
+        strongSelf.captureSession.sessionPreset = AVCaptureSessionPreset3840x2160;
         
         
         AVCaptureVideoDataOutput *output = [[AVCaptureVideoDataOutput alloc] init];
@@ -789,14 +779,12 @@ static NSString *const sessionQueueLabel = @"com.google.mlkit.visiondetector.Ses
 #pragma mark - 박스영역
 - (void)setUpAnnotationOverlayView {
     [_cameraView addSubview:_annotationOverlayView];
-    NSLog(@" setUpAnnotationOverlayView 카메라뷰 사이즈 %f, %f",_cameraView.frame.size.width,_cameraView.frame.size.height);
+    
     [NSLayoutConstraint activateConstraints:@[
         [_annotationOverlayView.topAnchor      constraintEqualToAnchor:_cameraView.topAnchor],
         [_annotationOverlayView.leadingAnchor  constraintEqualToAnchor:_cameraView.leadingAnchor],
         [_annotationOverlayView.trailingAnchor constraintEqualToAnchor:_cameraView.trailingAnchor],
         [_annotationOverlayView.bottomAnchor   constraintEqualToAnchor:_cameraView.bottomAnchor]
-        
-        
     ]];
 }
 
