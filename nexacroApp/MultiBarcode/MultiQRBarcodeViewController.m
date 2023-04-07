@@ -685,7 +685,6 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
         
         if (barcodes.count == 0)
             return;
-
         
         for (MLKBarcode *barcode in barcodes) {
             [self drawBarcodeAreaWithBarcodeObject:barcode
@@ -693,6 +692,7 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
                                             height:height];
 
             [self countBarcode:barcode];
+            
             if ( isUseAutoCapture == YES )
                 [ self autoScaningProcess ];
 
