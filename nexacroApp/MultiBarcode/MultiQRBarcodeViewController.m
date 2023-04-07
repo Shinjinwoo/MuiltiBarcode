@@ -156,19 +156,6 @@ static NSString *const sessionQueueLabel = @"com.google.mlkit.visiondetector.Ses
     
 }
 
-#pragma mark - 캡쳐버튼 UI 처리
--(UIImage*)setCaptureButtonImage {
-    UIImage *largeBoldDoc;
-    if (@available(iOS 13.0, *)) {
-        UIImageSymbolConfiguration *largeConfig = [UIImageSymbolConfiguration configurationWithPointSize:60 weight:UIImageSymbolWeightBold scale:UIImageSymbolScaleLarge];
-        
-        largeBoldDoc = [UIImage systemImageNamed:@"circle.fill" withConfiguration:largeConfig];
-    } else {
-        largeBoldDoc = [UIImage imageNamed:@"circle_fill"];
-    }
-    
-    return largeBoldDoc;
-}
 
 #pragma mark - 기능단위 정리
 
@@ -309,7 +296,10 @@ static NSString *const sessionQueueLabel = @"com.google.mlkit.visiondetector.Ses
     // 뷰 종료
 }
 
-#pragma mark - 넥사크로로 전송 ( 테스트 코드 )
+#pragma mark - 넥사크로로 전송
+
+
+//테스트 코드
 - (void) sendToMultiBarcodePlugin2 {
     NSArray *test = [self sortedMutableArrayByDuplicateValue:_array];
     int a = 2;
@@ -325,7 +315,6 @@ static NSString *const sessionQueueLabel = @"com.google.mlkit.visiondetector.Ses
 }
 
 
-#pragma mark - 넥사크로로 전송
 - (void) sendToMultiQRBarcodePlugin {
     
     if ( self.selectingCount <= 0  )
@@ -655,6 +644,22 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
     });
 }
 
+
+- (AVCaptureDevice *)captureDeviceForPosition:(AVCaptureDevicePosition)position {
+    if (@available(iOS 10, *)) {
+        AVCaptureDeviceDiscoverySession *discoverySession = [AVCaptureDeviceDiscoverySession
+                                                             discoverySessionWithDeviceTypes:@[ AVCaptureDeviceTypeBuiltInWideAngleCamera ]
+                                                             mediaType:AVMediaTypeVideo
+                                                             position:AVCaptureDevicePositionUnspecified];
+        for (AVCaptureDevice *device in discoverySession.devices) {
+            if (device.position == position) {
+                return device;
+            }
+        }
+    }
+    return nil;
+}
+
 #pragma mark MLKit 스캔결과
 - (void)scanBarcodesOnDeviceInImage:(MLKVisionImage *)image
                               width:(CGFloat)width
@@ -729,7 +734,7 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
     ]];
 }
 
-#pragma mark 텍스트 라벨 추가 함수
+//텍스트 라벨 추가 영역
 -(UILabel*)getTextLabelWithCGRect :(CGRect) standardizedRect
                   withDisplayValue:(NSString*) displayValue {
     
@@ -782,7 +787,7 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
 }
 
 
-#pragma mark 텍스트 라벨 박스 사이즈 가로세로 대응
+// 텍스트 라벨 가로세로 대응 함수
 -(CGRect) getRotatedCGRect :(CGRect) standardizedRect {
     
     CGRect textLabelRect;
@@ -811,30 +816,17 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
     
     return textLabelRect;
 }
-- (AVCaptureDevice *)captureDeviceForPosition:(AVCaptureDevicePosition)position {
-    if (@available(iOS 10, *)) {
-        AVCaptureDeviceDiscoverySession *discoverySession = [AVCaptureDeviceDiscoverySession
-                                                             discoverySessionWithDeviceTypes:@[ AVCaptureDeviceTypeBuiltInWideAngleCamera ]
-                                                             mediaType:AVMediaTypeVideo
-                                                             position:AVCaptureDevicePositionUnspecified];
-        for (AVCaptureDevice *device in discoverySession.devices) {
-            if (device.position == position) {
-                return device;
-            }
-        }
-    }
-    return nil;
-}
 
 
-//이전 프레임에 작성된 UI작업 삭제
+
+// 이전 프레임에 작성된 UI 삭제
 - (void)removeDetectionAnnotations {
     for (UIView *annotationView in _annotationOverlayView.subviews) {
         [annotationView removeFromSuperview];
     }
 }
 
-#pragma mark  캡쳐세션에서 새로이 인식된 이미지 버퍼로 UI 재호출
+// 새로운 프레임에 UI 작업 재호출
 - (void)updatePreviewOverlayViewWithLastFrame {
     CVImageBufferRef imageBuffer = CMSampleBufferGetImageBuffer(_lastFrame);
     [self updatePreviewOverlayViewWithImageBuffer:imageBuffer];
@@ -851,7 +843,8 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
     _previewOverlayView.image = image;
 }
 
-#pragma mark  바코드 박스 및 라벨 UI 작업
+
+// 바코드 객체를 통해 박스영역과 텍스트 라벨 UI작업
 - (void) drawBarcodeAreaWithBarcodeObject : (MLKBarcode*)barcode
                                      width: (CGFloat)width
                                     height: (CGFloat)height {
@@ -877,6 +870,20 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
         UILabel *textLabel = [self getTextLabelWithCGRect:standardizedRect withDisplayValue:barcode.displayValue];
         [strongSelf.annotationOverlayView addSubview:textLabel];
     }
+}
+
+// 캡쳐버튼 UI 처리
+-(UIImage*)setCaptureButtonImage {
+    UIImage *largeBoldDoc;
+    if (@available(iOS 13.0, *)) {
+        UIImageSymbolConfiguration *largeConfig = [UIImageSymbolConfiguration configurationWithPointSize:60 weight:UIImageSymbolWeightBold scale:UIImageSymbolScaleLarge];
+        
+        largeBoldDoc = [UIImage systemImageNamed:@"circle.fill" withConfiguration:largeConfig];
+    } else {
+        largeBoldDoc = [UIImage imageNamed:@"circle_fill"];
+    }
+    
+    return largeBoldDoc;
 }
 
 @end
