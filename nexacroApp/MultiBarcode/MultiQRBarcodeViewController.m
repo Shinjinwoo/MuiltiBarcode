@@ -495,12 +495,18 @@ static NSString *const sessionQueueLabel = @"com.google.mlkit.visiondetector.Ses
         [strongSelf.captureSession beginConfiguration];
         
         
-        //strongSelf.captureSession.sessionPreset = AVCaptureSessionPresetMedium;
-        //strongSelf.captureSession.sessionPreset = AVCaptureSessionPresetHigh;
-        //strongSelf.captureSession.sessionPreset = AVCaptureSessionPreset3200x2400;
-        strongSelf.captureSession.sessionPreset = AVCaptureSessionPreset640x480;
-        //strongSelf.captureSession.sessionPreset = AVCaptureSessionPreset1920x1080;
-        //strongSelf.captureSession.sessionPreset = AVCaptureSessionPreset3840x2160;
+        /**
+         해상도 설정
+         
+             strongSelf.captureSession.sessionPreset = AVCaptureSessionPresetMedium;
+             strongSelf.captureSession.sessionPreset = AVCaptureSessionPresetHigh;
+             strongSelf.captureSession.sessionPreset = AVCaptureSessionPreset640x480;
+             strongSelf.captureSession.sessionPreset = AVCaptureSessionPreset1920x1080;
+             strongSelf.captureSession.sessionPreset = AVCaptureSessionPreset3840x2160;
+         */
+        
+        strongSelf.captureSession.sessionPreset = AVCaptureSessionPreset1920x1080;
+    
         
         
         AVCaptureVideoDataOutput *output = [[AVCaptureVideoDataOutput alloc] init];
@@ -816,8 +822,6 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
     
     return textLabelRect;
 }
-
-
 
 // 이전 프레임에 작성된 UI 삭제
 - (void)removeDetectionAnnotations {
