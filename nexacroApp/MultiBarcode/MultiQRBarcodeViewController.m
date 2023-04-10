@@ -288,24 +288,6 @@ static NSString *const sessionQueueLabel = @"com.google.mlkit.visiondetector.Ses
 }
 
 #pragma mark - 넥사크로로 전송
-
-
-//테스트 코드
-- (void) sendToMultiBarcodePlugin2 {
-    NSArray *test = [self sortedMutableArrayByDuplicateValue:_array];
-    int a = 2;
-    @try {
-        for( int i = 1; i <= a; i++  ) {
-            NSLog(@"%@",[test objectAtIndex: [test count] - i ]);
-        }
-    } @catch (NSException *exception) {
-        [_multiQRBarcodePlugin send:CODE_ERROR withMsg:[exception description]];
-    } @finally {
-        NSLog(@"Finish");
-    }
-}
-
-
 - (void) sendToMultiQRBarcodePlugin {
     
     if ( self.selectingCount <= 0  )
@@ -873,7 +855,15 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
         UIImageSymbolConfiguration *largeConfig = [UIImageSymbolConfiguration configurationWithPointSize:60 weight:UIImageSymbolWeightBold scale:UIImageSymbolScaleLarge];
         largeBoldDoc = [UIImage systemImageNamed:@"circle.fill" withConfiguration:largeConfig];
     } else {
-        largeBoldDoc = [UIImage imageNamed:@"circle_fill"];
+        UIGraphicsImageRenderer *renderer = [[UIGraphicsImageRenderer alloc] initWithSize:CGSizeMake(80.0, 80.0)];
+        largeBoldDoc = [renderer imageWithActions:^(UIGraphicsImageRendererContext * _Nonnull rendererContext) {
+            // Draw a white circle inside a 60x60 point rectangle
+            UIBezierPath *circlePath = [UIBezierPath bezierPathWithOvalInRect:CGRectMake(0, 0, 80.0, 80.0)];
+            [[UIColor whiteColor] setFill];
+            [circlePath fill];
+        }];
+        
+        //largeBoldDoc = [UIImage imageNamed:@"circle_fill"];
     }
     
     return largeBoldDoc;
