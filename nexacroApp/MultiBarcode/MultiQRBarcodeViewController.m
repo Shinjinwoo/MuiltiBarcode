@@ -265,19 +265,10 @@ static NSString *const sessionQueueLabel = @"com.google.mlkit.visiondetector.Ses
 
 #pragma mark - 버튼 이벤트
 - (IBAction)onCaptureBtnClick:(id)sender {
-
-    _alredySend = YES;
-    // 비동기처리 Flag 값
     
-    if (self.isUseSoundEffect == YES)
-        [self playSound];
     
     [self sendToMultiQRBarcodePlugin];
     // 플러그인에 바코드에 대한 정보를 전송하는 함수 호출
-    
-    if ( self.isUseVibration == YES )
-        [self startVibrate];
-    // 진동기능
     
     [self dismissViewControllerAnimated:YES completion:nil];
     // 뷰 종료
@@ -366,10 +357,23 @@ static NSString *const sessionQueueLabel = @"com.google.mlkit.visiondetector.Ses
                 [_multiQRBarcodePlugin sendEx:CODE_ERROR eventID:@"_oncallback" serviceID:SERVICE_ID andMsg:[exception description]];
             }
         } @finally {
+            
+            
             if (_returnArray.count <= 0)
                 [_multiQRBarcodePlugin sendEx:CODE_ERROR eventID:@"_oncallback" serviceID:SERVICE_ID andMsg:@"No barcodes captured"];
-            else
+            
+            else {
+                if (self.isUseSoundEffect == YES)
+                    [self playSound];
+                
+                if ( self.isUseVibration == YES )
+                    [self startVibrate];
+                
                 [_multiQRBarcodePlugin sendEx:CODE_SUCCES eventID:@"_oncallback" serviceID:SERVICE_ID andMsg:(NSString*)_returnArray];
+            }
+            
+            _alredySend = YES;
+            // 비동기처리 Flag 값
             
             [_array removeAllObjects];
             [_barcodeFormatTable removeAllObjects];
@@ -442,20 +446,11 @@ static NSString *const sessionQueueLabel = @"com.google.mlkit.visiondetector.Ses
         
         if ( _array.count >= self.limitCount ) {
             if ( _alredySend == NO ) {
-                // 진동기능
-                if ( self.isUseVibration == YES )
-                    [self startVibrate];
-                
-                //사운드
-                if (self.isUseSoundEffect == YES)
-                    [self playSound];
-                
                 // 넥사크로로 전송
                 [self sendToMultiQRBarcodePlugin];
                 
                 // 뷰 종료
                 [self dismissViewControllerAnimated:YES completion:nil];
-                _alredySend = YES;
             }
         }
     }
@@ -469,11 +464,6 @@ static NSString *const sessionQueueLabel = @"com.google.mlkit.visiondetector.Ses
 // 타이머 핸들러
 -(void)timerFire:(NSTimer*)timer {
     if (_alredySend == NO) {
-        if (self.isUseSoundEffect == YES)
-            [self playSound];
-        
-        if ( self.isUseVibration == YES )
-            [self startVibrate];
         // 진동기능
         [self sendToMultiQRBarcodePlugin];
         [self dismissViewControllerAnimated:YES completion:nil];
@@ -881,7 +871,6 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
     UIImage *largeBoldDoc;
     if (@available(iOS 13.0, *)) {
         UIImageSymbolConfiguration *largeConfig = [UIImageSymbolConfiguration configurationWithPointSize:60 weight:UIImageSymbolWeightBold scale:UIImageSymbolScaleLarge];
-        
         largeBoldDoc = [UIImage systemImageNamed:@"circle.fill" withConfiguration:largeConfig];
     } else {
         largeBoldDoc = [UIImage imageNamed:@"circle_fill"];
