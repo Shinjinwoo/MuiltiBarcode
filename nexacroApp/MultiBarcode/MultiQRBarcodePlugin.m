@@ -128,7 +128,7 @@ const int MLKIT_FORMAT_ALL = 0xFFFF;
     
     #pragma mark  진동 기능 Set [ 테스트 코드 ]
     bool useVibration    = [dic boolValueForKey:@"useVibration"];
-    useVibration = NO;
+    useVibration = YES;
     if ( useVibration == YES )
         [multiQRBarcodeVC setIsUseVibration:YES];
     else if ( useVibration == NO )

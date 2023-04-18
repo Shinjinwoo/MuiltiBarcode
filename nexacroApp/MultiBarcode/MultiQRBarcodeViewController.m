@@ -53,9 +53,14 @@ static NSString *const sessionQueueLabel = @"com.google.mlkit.visiondetector.Ses
 @property(nonatomic) NSMutableDictionary *barcodeInfoDic;
 @property(nonatomic) BOOL timerStatus;
 @property(nonatomic) BOOL alredySend;
+
+@property(nonatomic) BOOL btnSend;
+
 @property(nonatomic) NexacroAppDelegate *nexacroAppDelegate;
 @property(nonatomic) MultiQRBarcodePlugin *multiQRBarcodePlugin;
 @property(nonatomic) AVCaptureDevice *device;
+
+
 
 @end
 
@@ -89,6 +94,7 @@ static NSString *const sessionQueueLabel = @"com.google.mlkit.visiondetector.Ses
     
     _alredySend = NO;
     _timerStatus = YES;
+    _btnSend = NO;
     
     if (self.boxColor == nil )
         self.boxColor = UIColor.yellowColor;
@@ -160,7 +166,7 @@ static NSString *const sessionQueueLabel = @"com.google.mlkit.visiondetector.Ses
 #pragma mark - 기능단위 정리
 
 - (void)startVibrate {
-        AudioServicesPlaySystemSound(kSystemSoundID_Vibrate);
+    AudioServicesPlaySystemSound(kSystemSoundID_Vibrate);
 }
 
 
@@ -204,16 +210,16 @@ static NSString *const sessionQueueLabel = @"com.google.mlkit.visiondetector.Ses
     
     if (orientation == UIDeviceOrientationLandscapeLeft || orientation == UIDeviceOrientationLandscapeRight ) {
         toastLabel.frame = CGRectMake(  self.previewOverlayView.frame.origin.x,
-                                        self.previewOverlayView.frame.size.height/2,
-                                        75,
-                                        35);
+                                      self.previewOverlayView.frame.size.height/2,
+                                      75,
+                                      35);
         //toastLabel.transform = CGAffineTransformMakeRotation(M_PI_2);
         
     } else {
         toastLabel.frame = CGRectMake(  self.cameraView.frame.size.width/2 - 37.5,
-                                        self.cameraView.frame.size.height-50,
-                                        75,
-                                        35);
+                                      self.cameraView.frame.size.height-50,
+                                      75,
+                                      35);
     }
     
     
@@ -238,7 +244,7 @@ static NSString *const sessionQueueLabel = @"com.google.mlkit.visiondetector.Ses
 
 - (void) playSound {
     @try {
-
+        
         NSError *error;
         // 음악 파일 경로 이름 ( Sample )
         NSString *soundFilePath = [[NSBundle mainBundle] pathForResource:@"scan_beep" ofType:@"mp3"];
@@ -247,7 +253,7 @@ static NSString *const sessionQueueLabel = @"com.google.mlkit.visiondetector.Ses
         // AVAudioPlayer 객체 생성
         _avAudioPlayer = [[AVAudioPlayer alloc] initWithContentsOfURL:soundFileURL error:&error];
         // 재생
-
+        
         if ( error == nil )
             [_avAudioPlayer play];
         else
@@ -267,10 +273,12 @@ static NSString *const sessionQueueLabel = @"com.google.mlkit.visiondetector.Ses
 - (IBAction)onCaptureBtnClick:(id)sender {
     
     
-    [self sendToMultiQRBarcodePlugin];
+    //[self sendToMultiQRBarcodePlugin];
     // 플러그인에 바코드에 대한 정보를 전송하는 함수 호출
     
-    [self dismissViewControllerAnimated:YES completion:nil];
+    _btnSend = YES;
+    
+    //[self dismissViewControllerAnimated:YES completion:nil];
     // 뷰 종료
 }
 
@@ -288,7 +296,48 @@ static NSString *const sessionQueueLabel = @"com.google.mlkit.visiondetector.Ses
 }
 
 #pragma mark - 넥사크로로 전송
-- (void) sendToMultiQRBarcodePlugin {
+- (void) sendToMultiQRBarcodePlugin : (NSArray <MLKBarcode *>* ) barcodes {
+    
+    @try {
+        _returnArray = [[NSMutableArray alloc]init];
+        
+        if ( barcodes.count == 0 ) {
+            
+        } else {
+            for (MLKBarcode *barcode in barcodes) {
+                NSDictionary *infoDic = @{
+                    @"format"           : [NSString stringWithFormat:@"%ld",(long)barcode.format],
+                    @"rawValue"         : barcode.rawValue,
+                    @"displayValueType" : [NSString stringWithFormat:@"%ld",(long)barcode.valueType],
+                    @"displayValue"     : barcode.displayValue
+                };
+                
+                [_returnArray addObject:infoDic];
+            }
+        }
+    } @catch (NSException *exception) {
+        [_multiQRBarcodePlugin sendEx:CODE_ERROR eventID:@"_oncallback" serviceID:SERVICE_ID andMsg:[exception description]];
+    } @finally {
+        if (_returnArray.count <= 0)
+            [_multiQRBarcodePlugin sendEx:CODE_ERROR eventID:@"_oncallback" serviceID:SERVICE_ID andMsg:@"No barcodes captured"];
+        
+        else {
+            if (self.isUseSoundEffect == YES)
+                [self playSound];
+            
+            if ( self.isUseVibration == YES )
+                [self startVibrate];
+            
+            [_multiQRBarcodePlugin sendEx:CODE_SUCCES eventID:@"_oncallback" serviceID:SERVICE_ID andMsg:(NSString*)_returnArray];
+        }
+        
+        _btnSend = NO;
+        
+        [_returnArray removeAllObjects];
+    }
+}
+#pragma mark - 넥사크로로 전송 [ 오토캡쳐 ]
+- (void) sendToMultiQRBarcodePluginAuto {
     
     if ( self.selectingCount <= 0  )
         [_multiQRBarcodePlugin send:CODE_ERROR withMsg:@"Count Set is null"];
@@ -315,22 +364,23 @@ static NSString *const sessionQueueLabel = @"com.google.mlkit.visiondetector.Ses
                 // 바코드 값을 기준으로 포맷 테이블에서 해당 바코드의 포멧을 가져옴
                 NSString *valueType = [[_barcodeFormatTable valueForKey:mapKey]valueForKey:@"displayValueType"];
                 // 바코드의 벨류 타입
-                NSString *count     = [frequencyCounts valueForKey:mapKey];
+                NSInteger count     = [[frequencyCounts valueForKey:mapKey]integerValue];
                 // 바코드 값을 기준으로 해당 바코드의 버퍼마다 누적 카운팅 된 숫자를 가져옴
                 
-                NSLog(@"상위 %d번째로 많이 누적 캡쳐된 바코드의 벨류: %@ 포멧 : %@ 누적 캡처된 수 : %@", idx, mapKey,mapValue,count);
+                NSLog(@"상위 %d번째로 많이 누적 캡쳐된 바코드의 벨류: %@ 포멧 : %@ 누적 캡처된 수 : %ld", idx, mapKey,mapValue,(long)count);
                 
-                //TODO 중복값을 제거한 바코드 포맷 테이블 [ 키 : 바코드 로우데이터 , 벨류 : 포멧 ]과 누적된 값이 상위로 정의 된 NSDic에서 키 벨류로 다시 매핑하기
                 
-                NSDictionary *infoDic = @{
-                    @"format"           : mapValue,
-                    @"displayValue"     : mapKey,
-                    @"rawValue"         : rawValue,
-                    @"displayValueType" : valueType
-                };
-                
-                [_returnArray addObject:infoDic];
-                
+                if (  count > (self.limitCount / 5) ) {
+                    
+                    NSDictionary *infoDic = @{
+                        @"format"           : mapValue,
+                        @"displayValue"     : mapKey,
+                        @"rawValue"         : rawValue,
+                        @"displayValueType" : valueType
+                    };
+                    
+                    [_returnArray addObject:infoDic];
+                }
             }
         } @catch (NSException *exception) {
             if ( [exception.name isEqualToString:@"NSRangeException"]) {
@@ -401,7 +451,6 @@ static NSString *const sessionQueueLabel = @"com.google.mlkit.visiondetector.Ses
         count = @(count.intValue + 1);
         frequencyCounts[element] = count;
     }
-    
     return frequencyCounts;
 }
 
@@ -421,21 +470,21 @@ static NSString *const sessionQueueLabel = @"com.google.mlkit.visiondetector.Ses
 
 //오토 스캔
 - (void) autoScaningProcess {
-        if ( _timerStatus == YES  && isUnlimitedTime == NO) {
-            _timerStatus = NO;
-            [self startTimer];
-        }
-        
-        if ( _array.count >= self.limitCount ) {
-            if ( _alredySend == NO ) {
-                // 넥사크로로 전송
-                [self sendToMultiQRBarcodePlugin];
-                
-                // 뷰 종료
-                [self dismissViewControllerAnimated:YES completion:nil];
-            }
+    if ( _timerStatus == YES  && isUnlimitedTime == NO) {
+        _timerStatus = NO;
+        [self startTimer];
+    }
+    
+    if ( _array.count >= self.limitCount ) {
+        if ( _alredySend == NO ) {
+            // 넥사크로로 전송
+            [self sendToMultiQRBarcodePluginAuto];
+            
+            // 뷰 종료
+            [self dismissViewControllerAnimated:YES completion:nil];
         }
     }
+}
 
 // 타미어 시작
 -(void)startTimer {
@@ -447,7 +496,7 @@ static NSString *const sessionQueueLabel = @"com.google.mlkit.visiondetector.Ses
 -(void)timerFire:(NSTimer*)timer {
     if (_alredySend == NO) {
         // 진동기능
-        [self sendToMultiQRBarcodePlugin];
+        [self sendToMultiQRBarcodePluginAuto];
         [self dismissViewControllerAnimated:YES completion:nil];
     }
 }
@@ -470,15 +519,15 @@ static NSString *const sessionQueueLabel = @"com.google.mlkit.visiondetector.Ses
         /**
          해상도 설정
          
-             strongSelf.captureSession.sessionPreset = AVCaptureSessionPresetMedium;
-             strongSelf.captureSession.sessionPreset = AVCaptureSessionPresetHigh;
-             strongSelf.captureSession.sessionPreset = AVCaptureSessionPreset640x480;
-             strongSelf.captureSession.sessionPreset = AVCaptureSessionPreset1920x1080;
-             strongSelf.captureSession.sessionPreset = AVCaptureSessionPreset3840x2160;
+         strongSelf.captureSession.sessionPreset = AVCaptureSessionPresetMedium;
+         strongSelf.captureSession.sessionPreset = AVCaptureSessionPresetHigh;
+         strongSelf.captureSession.sessionPreset = AVCaptureSessionPreset640x480;
+         strongSelf.captureSession.sessionPreset = AVCaptureSessionPreset1920x1080;
+         strongSelf.captureSession.sessionPreset = AVCaptureSessionPreset3840x2160;
          */
         
         strongSelf.captureSession.sessionPreset = AVCaptureSessionPreset1920x1080;
-    
+        
         
         
         AVCaptureVideoDataOutput *output = [[AVCaptureVideoDataOutput alloc] init];
@@ -540,10 +589,10 @@ static NSString *const sessionQueueLabel = @"com.google.mlkit.visiondetector.Ses
                         
                         if ( strongSelf.device.maxAvailableVideoZoomFactor <= self.zoomFactor )
                             strongSelf.device.videoZoomFactor = strongSelf.device.maxAvailableVideoZoomFactor;
-                         else if ( weakSelf.device.minAvailableVideoZoomFactor >= self.zoomFactor )
-                             strongSelf.device.videoZoomFactor = strongSelf.device.minAvailableVideoZoomFactor;
-                         else
-                             strongSelf.device.videoZoomFactor = self.zoomFactor;
+                        else if ( weakSelf.device.minAvailableVideoZoomFactor >= self.zoomFactor )
+                            strongSelf.device.videoZoomFactor = strongSelf.device.minAvailableVideoZoomFactor;
+                        else
+                            strongSelf.device.videoZoomFactor = self.zoomFactor;
                         
                         
                         [strongSelf.device unlockForConfiguration];
@@ -666,6 +715,11 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
             return;
         }
         
+        if ( _btnSend == YES ) {
+            [self sendToMultiQRBarcodePlugin:barcodes];
+            [self dismissViewControllerAnimated:YES completion:nil];
+        }
+        
         if (barcodes.count == 0)
             return;
         
@@ -673,14 +727,14 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
             [self drawBarcodeAreaWithBarcodeObject:barcode
                                              width:width
                                             height:height];
-
-            [self countBarcode:barcode];
             
+            [self countBarcode:barcode];
             if ( isUseAutoCapture == YES )
                 [ self autoScaningProcess ];
-
+            
         }
-    });
+    }
+                  );
 }
 
 
@@ -726,7 +780,7 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
         [description appendString:displayValue];
     
     if (orientation == UIDeviceOrientationLandscapeLeft || orientation == UIDeviceOrientationLandscapeRight ) {
-
+        
         label.textColor = [UIColor blackColor];
         label.backgroundColor = [UIColor yellowColor];
         label.layer.borderWidth = 1.0;
@@ -774,21 +828,21 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
     if (orientation == UIDeviceOrientationLandscapeLeft || orientation == UIDeviceOrientationLandscapeRight ) {
         
         textLabelRect = CGRectMake( standardizedRect.origin.x + standardizedRect.size.width,// X
-                                    standardizedRect.origin.y,                              // Y
-                                    20,                                                     // Width
-                                    standardizedRect.size.height / 2 );                     // Height
+                                   standardizedRect.origin.y,                              // Y
+                                   20,                                                     // Width
+                                   standardizedRect.size.height / 2 );                     // Height
     } else {
         textLabelRect = CGRectMake( standardizedRect.origin.x,          // X
-                                    standardizedRect.origin.y   - 20,   // Y
-                                    standardizedRect.size.width  / 2,   // Width
-                                    20 );                               // Height
+                                   standardizedRect.origin.y   - 20,   // Y
+                                   standardizedRect.size.width  / 2,   // Width
+                                   20 );                               // Height
         /**
          *
          우측 박스 내부 상단에 텍스트 라벨 생성
          CGRect textLabelRect = CGRectMake(  standardizedRect.origin.x + (standardizedRect.size.width  / 2),    // X
-                                             standardizedRect.origin.y,//   - 20,                               // Y
-                                             standardizedRect.size.width  / 2,                                  // Width
-                                             20 );                                                              // Height
+         standardizedRect.origin.y,//   - 20,                               // Y
+         standardizedRect.size.width  / 2,                                  // Width
+         20 );                                                              // Height
          */
     }
     
@@ -837,7 +891,7 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
     // 카메라 화면을 기준으로 박스의 비율을 '상대적'으로 계산
     [UIUtilities addRectangle:standardizedRect
                        toView:strongSelf.annotationOverlayView
-                        //color:UIColor.greenColor
+     //color:UIColor.greenColor
                         color:self.boxColor];
     
     
