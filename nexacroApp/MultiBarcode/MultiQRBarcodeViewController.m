@@ -272,7 +272,6 @@ static NSString *const sessionQueueLabel = @"com.google.mlkit.visiondetector.Ses
 #pragma mark - 버튼 이벤트
 - (IBAction)onCaptureBtnClick:(id)sender {
     
-    
     //[self sendToMultiQRBarcodePlugin];
     // 플러그인에 바코드에 대한 정보를 전송하는 함수 호출
     
@@ -365,13 +364,13 @@ static NSString *const sessionQueueLabel = @"com.google.mlkit.visiondetector.Ses
                 NSString *valueType = [[_barcodeFormatTable valueForKey:mapKey]valueForKey:@"displayValueType"];
                 // 바코드의 벨류 타입
                 NSInteger count     = [[frequencyCounts valueForKey:mapKey]integerValue];
+                
+                NSInteger sameCount  =    [[[_barcodeFormatTable valueForKey:mapKey]valueForKey:@"sameScanCount"]integerValue];
                 // 바코드 값을 기준으로 해당 바코드의 버퍼마다 누적 카운팅 된 숫자를 가져옴
                 
                 NSLog(@"상위 %d번째로 많이 누적 캡쳐된 바코드의 벨류: %@ 포멧 : %@ 누적 캡처된 수 : %ld", idx, mapKey,mapValue,(long)count);
                 
-                
-                if (  count > (self.limitCount / 5) ) {
-                    
+                if (  sameCount >= idx  ) {
                     NSDictionary *infoDic = @{
                         @"format"           : mapValue,
                         @"displayValue"     : mapKey,
@@ -389,7 +388,6 @@ static NSString *const sessionQueueLabel = @"com.google.mlkit.visiondetector.Ses
                 [_multiQRBarcodePlugin sendEx:CODE_ERROR eventID:@"_oncallback" serviceID:SERVICE_ID andMsg:[exception description]];
             }
         } @finally {
-            
             
             if (_returnArray.count <= 0)
                 [_multiQRBarcodePlugin sendEx:CODE_ERROR eventID:@"_oncallback" serviceID:SERVICE_ID andMsg:@"No barcodes captured"];
@@ -420,22 +418,18 @@ static NSString *const sessionQueueLabel = @"com.google.mlkit.visiondetector.Ses
 #pragma mark - 로직단위
 
 //바코드 카운팅
-- (void) countBarcode : (MLKBarcode*)barcode {
+- (void) countBarcode : (MLKBarcode*)barcode count : (NSInteger)count {
     
     NSDictionary *qrBarcodeInfoDic = @{
         @"format"           : [NSString stringWithFormat:@"%ld",(long)barcode.format],
         @"rawValue"         : barcode.rawValue,
         @"displayValueType" : [NSString stringWithFormat:@"%ld",(long)barcode.valueType],
-        @"displayValue"     : barcode.displayValue
+        @"displayValue"     : barcode.displayValue,
+        @"sameScanCount"    : [NSString stringWithFormat:@"%ld",(long)count]
     };
     
-    //[_barcodeFormatTable setValue:qrBarcodeInfoDic forKey:barcode.displayValue];
     [_barcodeFormatTable setValue:qrBarcodeInfoDic forKey:barcode.rawValue];
-    
-    //NSLog(@"%@",_barcodeFormatTable);
-    //[_array addObject:barcode.displayValue];
     [_array addObject:barcode.rawValue];
-    
 }
 
 // 배열 요소별 누적 된 횟수 구하는 로직
@@ -720,15 +714,17 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
             [self dismissViewControllerAnimated:YES completion:nil];
         }
         
-        if (barcodes.count == 0)
-            return;
+        if (barcodes.count == 0) {
+            [_array removeAllObjects];
+        }
         
         for (MLKBarcode *barcode in barcodes) {
             [self drawBarcodeAreaWithBarcodeObject:barcode
                                              width:width
                                             height:height];
             
-            [self countBarcode:barcode];
+            [self countBarcode:barcode count:barcodes.count];
+            
             if ( isUseAutoCapture == YES )
                 [ self autoScaningProcess ];
             
