@@ -85,7 +85,7 @@ const int MLKIT_FORMAT_ALL = 0xFFFF;
         [self writeEvent:eventID  result:jsonStr];
     }
     @catch(NSException *e) {
-        //e.printStackTrace();
+        
     }
     @finally {
         self.mSerivceId = nil;
@@ -97,17 +97,6 @@ const int MLKIT_FORMAT_ALL = 0xFFFF;
 -(void) startScan : (NSDictionary*) dic {
     
     multiQRBarcodeVC = [[MultiQRBarcodeViewController alloc]init];
-    
-    
-    /*
-    BOOL useTextLabel    = [[dic valueForKey:@"useTextLabel"]   isEqualToString:@"true"];
-    BOOL useAutoCapture  = [[dic valueForKey:@"useAutoCapture"] isEqualToString:@"true"];
-    BOOL useSound        = [[dic valueForKey:@"useSound"] isEqualToString:@"true"];
-    CGFloat zoomFactor   = [[dic valueForKey:@"zoomFactor"] floatValue];
-    CGFloat limitTime    = [[dic valueForKey:@"limitTime"]  floatValue];
-    long limitCount      = [[dic valueForKey:@"limitCount"] longLongValue];
-    NSArray *setBarcodeFormat = [dic valueForKey:@"setScanFormat"];
-    */
     
     BOOL useFrontCamera  = [self getConvertedBoolComparedToAndroid:[dic valueForKey:@"switchToFrontCamera"]];
     BOOL useTextLabel    = [dic boolValueForKey:@"useTextLabel"     ];
@@ -137,7 +126,7 @@ const int MLKIT_FORMAT_ALL = 0xFFFF;
         [multiQRBarcodeVC setIsUseVibration:NO];
     
     
-    #pragma mark  핀치줌 기능 Set [ 테스트 코드 ]
+    #pragma mark  핀치줌 기능 Set
     bool usePinchZoom    = [dic boolValueForKey:@"usePinchZoom"];
     usePinchZoom = YES;
     if ( usePinchZoom == YES )
@@ -184,12 +173,19 @@ const int MLKIT_FORMAT_ALL = 0xFFFF;
     
     
     #pragma mark 캡쳐시 사용할 포맷 Set
-    if (setBarcodeFormat != nil)
+    if (setBarcodeFormat != nil) {
         //multiQRBarcodeVC.setBarcodeFormat = [self getSacnFormat:setBarcodeFormat];
-        [multiQRBarcodeVC setBarcodeFormat : [self getSacnFormat:setBarcodeFormat]];
-    
-    else
+        if ( setBarcodeFormat.count > 0 )
+            [multiQRBarcodeVC setBarcodeFormat : [self getSacnFormat:setBarcodeFormat]];
+        else {
+            [self send:CODE_ERROR withMsg:@"Barcode Format is Null"];
+            return;
+        }
+    }
+    else {
         [self send:CODE_ERROR withMsg:@"Barcode Format is Null"];
+        return;
+    }
     
     
     #pragma mark 오토캡쳐 사용여부 Set
@@ -221,6 +217,7 @@ const int MLKIT_FORMAT_ALL = 0xFFFF;
     if ( limitCount == 0 ) { // NSDic에서 값을 추출하지 못했을 경우 Default 값
         if ( limitCount == 0 && useAutoCapture == YES ) {
             [self send:CODE_ERROR withMsg:@"LimitCount is Null"];
+            return;
         } else if ( limitCount < 1 && useAutoCapture == YES ) {
             [self send:CODE_ERROR withMsg:@"LimitCount more than 1"];
             return;
@@ -244,12 +241,10 @@ const int MLKIT_FORMAT_ALL = 0xFFFF;
     //UIColor *color = [self hexcodeToUiColor:hexColor alpha:alpha];
     UIColor *color = [UIColor clearColor];
     
-    //TODO UIColor 핵사코드로 받아서 교체하기... 학습차원에서라도 해보기
     multiQRBarcodeVC.boxColor = color;
     
     
     [multiQRBarcodeVC setModalPresentationStyle:UIModalPresentationFullScreen];
-    
     [rootViewController presentViewController:multiQRBarcodeVC animated:YES completion:nil];
     
 }

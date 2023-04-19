@@ -47,19 +47,16 @@ static NSString *const sessionQueueLabel = @"com.google.mlkit.visiondetector.Ses
 @property(nonatomic) NSMutableDictionary *barcodeFormatTable;
 //@property(nonatomic) NSMutableSet *barcodeFormatTable;
 
-
 @property(nonatomic) NSMutableDictionary *sendToPluginDic;
 @property(nonatomic) NSMutableArray *returnArray;
 @property(nonatomic) NSMutableDictionary *barcodeInfoDic;
 @property(nonatomic) BOOL timerStatus;
 @property(nonatomic) BOOL alredySend;
-
+@property(nonatomic) NSUInteger sameCount;
 @property(nonatomic) BOOL btnSend;
-
 @property(nonatomic) NexacroAppDelegate *nexacroAppDelegate;
 @property(nonatomic) MultiQRBarcodePlugin *multiQRBarcodePlugin;
 @property(nonatomic) AVCaptureDevice *device;
-
 
 
 @end
@@ -95,6 +92,7 @@ static NSString *const sessionQueueLabel = @"com.google.mlkit.visiondetector.Ses
     _alredySend = NO;
     _timerStatus = YES;
     _btnSend = NO;
+    _sameCount = 0;
     
     if (self.boxColor == nil )
         self.boxColor = UIColor.yellowColor;
@@ -113,12 +111,10 @@ static NSString *const sessionQueueLabel = @"com.google.mlkit.visiondetector.Ses
     _barcodeInfoDic = [[NSMutableDictionary alloc]init];
     
     _captureSession = [[AVCaptureSession alloc] init];
-    // 캡처세션 초기화
-    _sessionQueue = dispatch_queue_create(sessionQueueLabel.UTF8String, nil);
     
+    _sessionQueue = dispatch_queue_create(sessionQueueLabel.UTF8String, nil);
     _previewOverlayView = [[UIImageView alloc] initWithFrame:CGRectZero];
     
-    //_previewOverlayView.contentMode = UIViewContentModeScaleAspectFill;
     _previewOverlayView.contentMode = UIViewContentModeScaleToFill;
     _previewOverlayView.translatesAutoresizingMaskIntoConstraints = NO;
     
@@ -127,12 +123,8 @@ static NSString *const sessionQueueLabel = @"com.google.mlkit.visiondetector.Ses
     _annotationOverlayView.translatesAutoresizingMaskIntoConstraints = NO;
     
     self.previewLayer = [AVCaptureVideoPreviewLayer layerWithSession:_captureSession];
-    
-    //self.previewLayer.videoGravity = AVLayerVideoGravityResizeAspectFill;
     self.previewLayer.videoGravity = AVLayerVideoGravityResize;
-    
     self.previewLayer.connection.videoOrientation = AVCaptureVideoOrientationPortrait;
-    //self.previewLayer.connection.videoOrientation = AVCaptureVideoOrientationLandscapeLeft
     
     [self setUpPreviewOverlayView];
     [self setUpAnnotationOverlayView];
@@ -242,6 +234,7 @@ static NSString *const sessionQueueLabel = @"com.google.mlkit.visiondetector.Ses
     }];
 }
 
+//사운드 재생
 - (void) playSound {
     @try {
         
@@ -271,14 +264,10 @@ static NSString *const sessionQueueLabel = @"com.google.mlkit.visiondetector.Ses
 
 #pragma mark - 버튼 이벤트
 - (IBAction)onCaptureBtnClick:(id)sender {
+    [self sendToMultiQRBarcodePluginAuto];
     
-    //[self sendToMultiQRBarcodePlugin];
-    // 플러그인에 바코드에 대한 정보를 전송하는 함수 호출
-    
-    _btnSend = YES;
-    
-    //[self dismissViewControllerAnimated:YES completion:nil];
     // 뷰 종료
+    [self dismissViewControllerAnimated:YES completion:nil];
 }
 
 - (IBAction)onBackBtnClick:(id)sender {
@@ -299,7 +288,6 @@ static NSString *const sessionQueueLabel = @"com.google.mlkit.visiondetector.Ses
     
     @try {
         _returnArray = [[NSMutableArray alloc]init];
-        
         if ( barcodes.count == 0 ) {
             
         } else {
@@ -318,7 +306,7 @@ static NSString *const sessionQueueLabel = @"com.google.mlkit.visiondetector.Ses
         [_multiQRBarcodePlugin sendEx:CODE_ERROR eventID:@"_oncallback" serviceID:SERVICE_ID andMsg:[exception description]];
     } @finally {
         if (_returnArray.count <= 0)
-            [_multiQRBarcodePlugin sendEx:CODE_ERROR eventID:@"_oncallback" serviceID:SERVICE_ID andMsg:@"No barcodes captured"];
+            [_multiQRBarcodePlugin sendEx:CODE_SUCCES eventID:@"_oncallback" serviceID:SERVICE_ID andMsg:@"No barcodes captured"];
         
         else {
             if (self.isUseSoundEffect == YES)
@@ -365,9 +353,10 @@ static NSString *const sessionQueueLabel = @"com.google.mlkit.visiondetector.Ses
                 // 바코드의 벨류 타입
                 NSInteger count     = [[frequencyCounts valueForKey:mapKey]integerValue];
                 
-                NSInteger sameCount  =    [[[_barcodeFormatTable valueForKey:mapKey]valueForKey:@"sameScanCount"]integerValue];
+                NSInteger sameCount = [[[_barcodeFormatTable valueForKey:mapKey]valueForKey:@"sameScanCount"]integerValue];
                 // 바코드 값을 기준으로 해당 바코드의 버퍼마다 누적 카운팅 된 숫자를 가져옴
                 
+                NSLog(@"해당 바코드와 같이 캡쳐된 바코드의 갯수 : %lu", sameCount);
                 NSLog(@"상위 %d번째로 많이 누적 캡쳐된 바코드의 벨류: %@ 포멧 : %@ 누적 캡처된 수 : %ld", idx, mapKey,mapValue,(long)count);
                 
                 if (  sameCount >= idx  ) {
@@ -390,7 +379,7 @@ static NSString *const sessionQueueLabel = @"com.google.mlkit.visiondetector.Ses
         } @finally {
             
             if (_returnArray.count <= 0)
-                [_multiQRBarcodePlugin sendEx:CODE_ERROR eventID:@"_oncallback" serviceID:SERVICE_ID andMsg:@"No barcodes captured"];
+                [_multiQRBarcodePlugin sendEx:CODE_SUCCES eventID:@"_oncallback" serviceID:SERVICE_ID andMsg:@"No barcodes captured"];
             
             else {
                 if (self.isUseSoundEffect == YES)
@@ -420,16 +409,20 @@ static NSString *const sessionQueueLabel = @"com.google.mlkit.visiondetector.Ses
 //바코드 카운팅
 - (void) countBarcode : (MLKBarcode*)barcode count : (NSInteger)count {
     
+    
+    if ( _sameCount <= count )
+        _sameCount = count;
+    
     NSDictionary *qrBarcodeInfoDic = @{
         @"format"           : [NSString stringWithFormat:@"%ld",(long)barcode.format],
         @"rawValue"         : barcode.rawValue,
         @"displayValueType" : [NSString stringWithFormat:@"%ld",(long)barcode.valueType],
         @"displayValue"     : barcode.displayValue,
-        @"sameScanCount"    : [NSString stringWithFormat:@"%ld",(long)count]
+        @"sameScanCount"    : [NSString stringWithFormat:@"%ld",(long)_sameCount]
     };
     
-    [_barcodeFormatTable setValue:qrBarcodeInfoDic forKey:barcode.rawValue];
-    [_array addObject:barcode.rawValue];
+    [_barcodeFormatTable setValue:qrBarcodeInfoDic forKey:barcode.displayValue];
+    [_array addObject:barcode.displayValue];
 }
 
 // 배열 요소별 누적 된 횟수 구하는 로직
@@ -518,10 +511,10 @@ static NSString *const sessionQueueLabel = @"com.google.mlkit.visiondetector.Ses
          strongSelf.captureSession.sessionPreset = AVCaptureSessionPreset640x480;
          strongSelf.captureSession.sessionPreset = AVCaptureSessionPreset1920x1080;
          strongSelf.captureSession.sessionPreset = AVCaptureSessionPreset3840x2160;
+         
          */
         
         strongSelf.captureSession.sessionPreset = AVCaptureSessionPreset1920x1080;
-        
         
         
         AVCaptureVideoDataOutput *output = [[AVCaptureVideoDataOutput alloc] init];
@@ -532,11 +525,7 @@ static NSString *const sessionQueueLabel = @"com.google.mlkit.visiondetector.Ses
         output.alwaysDiscardsLateVideoFrames = YES;
         dispatch_queue_t outputQueue = dispatch_queue_create(videoDataOutputQueueLabel.UTF8String, nil);
         
-        
         [output setSampleBufferDelegate:self queue:outputQueue];
-        
-        // 샘플 버퍼 델리게이트와 콜백을 유도하는 큐를 세팅
-        // outputQueue : 비디오 프레임을 순차적으로 받는 시리얼 큐
         
         if ([strongSelf.captureSession canAddOutput:output]) {
             [strongSelf.captureSession addOutput:output];
@@ -571,23 +560,21 @@ static NSString *const sessionQueueLabel = @"com.google.mlkit.visiondetector.Ses
                 [strongSelf.captureSession removeInput:input];
             }
             NSError *error;
-            AVCaptureDeviceInput *input = [AVCaptureDeviceInput deviceInputWithDevice:weakSelf.device
-                                                                                error:&error];
+            AVCaptureDeviceInput *input = [AVCaptureDeviceInput deviceInputWithDevice:weakSelf.device error:&error];
+            
             if (error) {
                 NSLog(@"Failed to create capture device input: %@", error.localizedDescription);
                 return;
             } else {
                 if ([strongSelf.captureSession canAddInput:input]) {
                     [strongSelf.captureSession addInput:input];
-                    if ([strongSelf.device lockForConfiguration:&error]) {
-                        
+                    if ( [strongSelf.device lockForConfiguration:&error] ) {
                         if ( strongSelf.device.maxAvailableVideoZoomFactor <= self.zoomFactor )
                             strongSelf.device.videoZoomFactor = strongSelf.device.maxAvailableVideoZoomFactor;
                         else if ( weakSelf.device.minAvailableVideoZoomFactor >= self.zoomFactor )
                             strongSelf.device.videoZoomFactor = strongSelf.device.minAvailableVideoZoomFactor;
                         else
                             strongSelf.device.videoZoomFactor = self.zoomFactor;
-                        
                         
                         [strongSelf.device unlockForConfiguration];
                     } else {
@@ -649,6 +636,9 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
 }
 
 
+
+
+
 // 캡쳐세션 스타트
 - (void)startSession {
     __weak typeof(self) weakSelf = self;
@@ -695,13 +685,11 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
     
     __weak typeof(self) weakSelf = self;
     dispatch_sync(dispatch_get_main_queue(), ^{
-        // UI Thread에서 사용한다.
         
         __strong typeof(weakSelf) strongSelf = weakSelf;
         
         [strongSelf removeDetectionAnnotations];
         [strongSelf updatePreviewOverlayViewWithLastFrame];
-        // UI 작업등을 라스트 프레임에 업데이트 한다
         
         if (error != nil) {
             NSLog(@"Failed to scan barcodes with error: %@", error.localizedDescription);
@@ -709,13 +697,9 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
             return;
         }
         
-        if ( _btnSend == YES ) {
-            [self sendToMultiQRBarcodePlugin:barcodes];
-            [self dismissViewControllerAnimated:YES completion:nil];
-        }
-        
         if (barcodes.count == 0) {
             [_array removeAllObjects];
+            _sameCount = 0;
         }
         
         for (MLKBarcode *barcode in barcodes) {
@@ -828,17 +812,26 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
                                    20,                                                     // Width
                                    standardizedRect.size.height / 2 );                     // Height
     } else {
-        textLabelRect = CGRectMake( standardizedRect.origin.x,          // X
-                                   standardizedRect.origin.y   - 20,   // Y
-                                   standardizedRect.size.width  / 2,   // Width
-                                   20 );                               // Height
+        
+        textLabelRect = CGRectMake(  standardizedRect.origin.x + (standardizedRect.size.width  / 2),    // X
+        standardizedRect.origin.y,//   - 20,                               // Y
+        standardizedRect.size.width  / 2,                                  // Width
+        20 );                                                              // Height
+        
         /**
          *
-         우측 박스 내부 상단에 텍스트 라벨 생성
+         우측 상단 박스 내부에 텍스트 라벨 생성
          CGRect textLabelRect = CGRectMake(  standardizedRect.origin.x + (standardizedRect.size.width  / 2),    // X
          standardizedRect.origin.y,//   - 20,                               // Y
          standardizedRect.size.width  / 2,                                  // Width
          20 );                                                              // Height
+         
+         좌측 상단 박스 외부에 텍스트 라벨 생성
+         textLabelRect = CGRectMake( standardizedRect.origin.x,          // X
+                                    standardizedRect.origin.y   - 20,   // Y
+                                    standardizedRect.size.width  / 2,   // Width
+                                    20 );                               // Height
+         
          */
     }
     
@@ -887,11 +880,9 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
     // 카메라 화면을 기준으로 박스의 비율을 '상대적'으로 계산
     [UIUtilities addRectangle:standardizedRect
                        toView:strongSelf.annotationOverlayView
-     //color:UIColor.greenColor
                         color:self.boxColor];
     
     
-    // 포커스 된 바코드 영역을 MLKit Result를 통해 화면에 그리는 UI 작업
     if ( self.isUseTextLabel == YES ) {
         UILabel *textLabel = [self getTextLabelWithCGRect:standardizedRect withDisplayValue:barcode.displayValue];
         [strongSelf.annotationOverlayView addSubview:textLabel];
