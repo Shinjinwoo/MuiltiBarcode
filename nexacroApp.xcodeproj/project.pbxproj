@@ -11,7 +11,6 @@
 		5E1E896029D42BBC002943A3 /* MultiQRBarcodeViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 5E1E895E29D42BBC002943A3 /* MultiQRBarcodeViewController.xib */; };
 		5EC19BA829DACD1C00820209 /* scan_beep.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 5EC19BA729DACD1C00820209 /* scan_beep.mp3 */; };
 		5ED2CDA5299C9E1500D8CD4F /* UIUtilities.m in Sources */ = {isa = PBXBuildFile; fileRef = 5ED2CDA2299C9E1500D8CD4F /* UIUtilities.m */; };
-		5ED2CDA6299C9E1500D8CD4F /* UIImage+VisionDetection.m in Sources */ = {isa = PBXBuildFile; fileRef = 5ED2CDA3299C9E1500D8CD4F /* UIImage+VisionDetection.m */; };
 		5ED2CDB7299DE8F100D8CD4F /* MultiQRBarcodePlugin.m in Sources */ = {isa = PBXBuildFile; fileRef = 5ED2CDB6299DE8F100D8CD4F /* MultiQRBarcodePlugin.m */; };
 		616B47C1269BF339007F3453 /* Default-Portrait@2x~ipad.png in Resources */ = {isa = PBXBuildFile; fileRef = 616B47BE269BF339007F3453 /* Default-Portrait@2x~ipad.png */; };
 		616B47C2269BF339007F3453 /* Default-Portrait~ipad.png in Resources */ = {isa = PBXBuildFile; fileRef = 616B47BF269BF339007F3453 /* Default-Portrait~ipad.png */; };
@@ -42,9 +41,7 @@
 		5E1E895E29D42BBC002943A3 /* MultiQRBarcodeViewController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = MultiQRBarcodeViewController.xib; sourceTree = "<group>"; };
 		5EC19BA729DACD1C00820209 /* scan_beep.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = scan_beep.mp3; sourceTree = "<group>"; };
 		5ED2CD9E299C9E1400D8CD4F /* UIUtilities.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UIUtilities.h; sourceTree = "<group>"; };
-		5ED2CDA0299C9E1500D8CD4F /* UIImage+VisionDetection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIImage+VisionDetection.h"; sourceTree = "<group>"; };
 		5ED2CDA2299C9E1500D8CD4F /* UIUtilities.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UIUtilities.m; sourceTree = "<group>"; };
-		5ED2CDA3299C9E1500D8CD4F /* UIImage+VisionDetection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIImage+VisionDetection.m"; sourceTree = "<group>"; };
 		5ED2CDB5299DE8F100D8CD4F /* MultiQRBarcodePlugin.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MultiQRBarcodePlugin.h; sourceTree = "<group>"; };
 		5ED2CDB6299DE8F100D8CD4F /* MultiQRBarcodePlugin.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MultiQRBarcodePlugin.m; sourceTree = "<group>"; };
 		616B47BE269BF339007F3453 /* Default-Portrait@2x~ipad.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-Portrait@2x~ipad.png"; sourceTree = "<group>"; };
@@ -103,8 +100,6 @@
 		5ED2CD9D299C9DDD00D8CD4F /* MultiBarcode */ = {
 			isa = PBXGroup;
 			children = (
-				5ED2CDA0299C9E1500D8CD4F /* UIImage+VisionDetection.h */,
-				5ED2CDA3299C9E1500D8CD4F /* UIImage+VisionDetection.m */,
 				5ED2CD9E299C9E1400D8CD4F /* UIUtilities.h */,
 				5ED2CDA2299C9E1500D8CD4F /* UIUtilities.m */,
 				5ED2CDB5299DE8F100D8CD4F /* MultiQRBarcodePlugin.h */,
@@ -369,7 +364,6 @@
 				B8EC88151DE702DE00C30DD6 /* AppDelegate.m in Sources */,
 				5E1E895F29D42BBC002943A3 /* MultiQRBarcodeViewController.m in Sources */,
 				B8EC88121DE702DD00C30DD6 /* main.m in Sources */,
-				5ED2CDA6299C9E1500D8CD4F /* UIImage+VisionDetection.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

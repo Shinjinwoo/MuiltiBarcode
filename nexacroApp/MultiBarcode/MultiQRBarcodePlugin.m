@@ -8,7 +8,6 @@
 
 #import "MultiQRBarcodePlugin.h"
 #import "AppDelegate.h"
-//#import "CameraViewController2.h"
 #import "MultiQRBarcodeViewController.h"
 #import <AVFoundation/AVFoundation.h>
 
@@ -98,16 +97,16 @@ const int MLKIT_FORMAT_ALL = 0xFFFF;
     
     multiQRBarcodeVC = [[MultiQRBarcodeViewController alloc]init];
     
-    BOOL useFrontCamera  = [self getConvertedBoolComparedToAndroid:[dic valueForKey:@"switchToFrontCamera"]];
-    BOOL useTextLabel    = [dic boolValueForKey:@"useTextLabel"     ];
-    BOOL useAutoCapture  = [dic boolValueForKey:@"useAutoCapture"   ];
-    BOOL useSound        = [dic boolValueForKey:@"useSound"         ];
+    BOOL useFrontCamera  = [self getConvertedBoolComparedToAndroid:[dic valueForKey:@"cameraID"]];
+    BOOL useTextLabel    = [dic boolValueForKey:@"useTextLabel"];
+    BOOL useAutoCapture  = [dic boolValueForKey:@"useAutoCapture"];
+    BOOL useSound        = [dic boolValueForKey:@"useSound"];
     
-    CGFloat zoomFactor   = [[dic valueForKey:@"zoomFactor"] floatValue      ];
-    CGFloat limitTime    = [[dic valueForKey:@"limitTime"]  floatValue      ];
-    long limitCount      = [[dic valueForKey:@"limitCount"] longLongValue   ];
+    CGFloat zoomFactor   = [[dic valueForKey:@"zoomFactor"]floatValue];
+    CGFloat limitTime    = [[dic valueForKey:@"limitTime"]floatValue];
+    long limitCount      = [[dic valueForKey:@"limitCount"]longLongValue];
     
-    NSArray *setBarcodeFormat = [dic arryValueForKey:@"setScanFormat"];
+    NSArray *setBarcodeFormat = [dic arryValueForKey:@"scanFormat"];
     
     #pragma mark  n줄이상 바코드 기능 Set [ 테스트 코드 ]
     //추후 2줄 바코드 이상의 경우를 위해 옵션을 넣어놓지만 하드코딩으로 막아 놓기
@@ -124,7 +123,6 @@ const int MLKIT_FORMAT_ALL = 0xFFFF;
         [multiQRBarcodeVC setIsUseVibration:NO];
     else
         [multiQRBarcodeVC setIsUseVibration:NO];
-    
     
     #pragma mark  핀치줌 기능 Set
     bool usePinchZoom    = [dic boolValueForKey:@"usePinchZoom"];
@@ -178,13 +176,16 @@ const int MLKIT_FORMAT_ALL = 0xFFFF;
         if ( setBarcodeFormat.count > 0 )
             [multiQRBarcodeVC setBarcodeFormat : [self getSacnFormat:setBarcodeFormat]];
         else {
-            [self send:CODE_ERROR withMsg:@"Barcode Format is Null"];
-            return;
+            [multiQRBarcodeVC setBarcodeFormat:MLKIT_FORMAT_ALL];
+            //[self send:CODE_ERROR withMsg:@"Barcode Format is Null"];
+            //return;
         }
     }
     else {
-        [self send:CODE_ERROR withMsg:@"Barcode Format is Null"];
-        return;
+        //[self send:CODE_ERROR withMsg:@"Barcode Format is Null"];
+        //return;
+        
+        [multiQRBarcodeVC setBarcodeFormat:MLKIT_FORMAT_ALL];
     }
     
     
@@ -216,8 +217,7 @@ const int MLKIT_FORMAT_ALL = 0xFFFF;
     #pragma mark  리미트 카운트 Set
     if ( limitCount == 0 ) { // NSDic에서 값을 추출하지 못했을 경우 Default 값
         if ( limitCount == 0 && useAutoCapture == YES ) {
-            [self send:CODE_ERROR withMsg:@"LimitCount is Null"];
-            return;
+            multiQRBarcodeVC.limitCount = limitCount;
         } else if ( limitCount < 1 && useAutoCapture == YES ) {
             [self send:CODE_ERROR withMsg:@"LimitCount more than 1"];
             return;
@@ -309,7 +309,7 @@ const int MLKIT_FORMAT_ALL = 0xFFFF;
                              completionHandler:^(BOOL bSuccess) {
         if (!bSuccess ) {
             NSLog(@"openURL:[NSURL URLWithString:UIApplicationOpenSettingsURLString] Failed");
-            [self sendEx:CODE_ERROR
+            [self sendEx:CODE_PERMISSION_ERROR
                  eventID:CALL_BACK
                serviceID:SVCID
                   andMsg:@"openURL:[NSURL URLWithString:UIApplicationOpenSettingsURLString] Failed"];
@@ -373,7 +373,5 @@ const int MLKIT_FORMAT_ALL = 0xFFFF;
     
     return color;
 }
-
-
 
 @end

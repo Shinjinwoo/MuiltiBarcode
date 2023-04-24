@@ -15,7 +15,7 @@
 
 #define CODE_SUCCES       0
 #define CODE_ERROR        -1
-#define CODE_LOGIN_FAIL   -9
+#define CODE_PERMISSION_ERROR   -9
 
 
 @interface PluginCommon : DeviceAPI

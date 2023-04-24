@@ -186,7 +186,6 @@ static NSString *const sessionQueueLabel = @"com.google.mlkit.visiondetector.Ses
                 if (fabs(_device.videoZoomFactor - initialScale) >= 10 || fabs(_device.videoZoomFactor - initialScale) <= 10) {
                     [self showToast:[NSString stringWithFormat:@"배율 : %.1f",_device.videoZoomFactor] withDuration:1 delay:0.5 ];
                 }
-                
             }
             pinch.scale = 1.0;
             [_device unlockForConfiguration];
@@ -202,16 +201,16 @@ static NSString *const sessionQueueLabel = @"com.google.mlkit.visiondetector.Ses
     
     if (orientation == UIDeviceOrientationLandscapeLeft || orientation == UIDeviceOrientationLandscapeRight ) {
         toastLabel.frame = CGRectMake(  self.previewOverlayView.frame.origin.x,
-                                      self.previewOverlayView.frame.size.height/2,
-                                      75,
-                                      35);
+                                        self.previewOverlayView.frame.size.height/2,
+                                        75,
+                                        35);
         //toastLabel.transform = CGAffineTransformMakeRotation(M_PI_2);
         
     } else {
         toastLabel.frame = CGRectMake(  self.cameraView.frame.size.width/2 - 37.5,
-                                      self.cameraView.frame.size.height-50,
-                                      75,
-                                      35);
+                                        self.cameraView.frame.size.height-50,
+                                        75,
+                                        35);
     }
     
     
@@ -264,6 +263,7 @@ static NSString *const sessionQueueLabel = @"com.google.mlkit.visiondetector.Ses
 
 #pragma mark - 버튼 이벤트
 - (IBAction)onCaptureBtnClick:(id)sender {
+    
     [self sendToMultiQRBarcodePluginAuto];
     
     // 뷰 종료
@@ -384,7 +384,7 @@ static NSString *const sessionQueueLabel = @"com.google.mlkit.visiondetector.Ses
             else {
                 if (self.isUseSoundEffect == YES)
                     [self playSound];
-                
+                  
                 if ( self.isUseVibration == YES )
                     [self startVibrate];
                 
