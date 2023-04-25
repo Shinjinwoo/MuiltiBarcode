@@ -45,7 +45,6 @@ NS_ASSUME_NONNULL_BEGIN
 @property NSInteger  barcodeFormat;
 @property NSInteger  limitCount;
 
-
 @property CGFloat  limitTime;
 @property CGFloat  zoomFactor;
 
