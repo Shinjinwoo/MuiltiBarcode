@@ -10,7 +10,6 @@
 
 @implementation AppViewController
 
-
 @synthesize multiQRBarcodePlugin;
 
 // 자동 회전 지원 여부 (YES/NO)
@@ -25,18 +24,14 @@
     return UIInterfaceOrientationMaskPortrait;
 }
 
-
-
 @end
 
 @implementation AppDelegate
 
-@synthesize multiBarcodePlugin;
     
 - (NexacroMainViewController*)initializeMainViewController
 {
     NSString *bootstrapUrl = @"http://smart.tobesoft.co.kr/NexacroN/MultiQRBarcodePlugin/_ios_/start_ios.json";
-    //NSString *bootstrapUrl = @"http://smart.tobesoft.co.kr/techService/NexacroN/04_SeoulCredit/_ios_/start_ios.json";
 
     [[NexacroResourceManager sharedResourceManager] setBootstrapURL:bootstrapUrl isDirect:YES];
     AppViewController* controller = [[AppViewController alloc] initWithFullScreen:NO];

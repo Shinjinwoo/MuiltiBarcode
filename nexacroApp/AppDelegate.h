@@ -23,8 +23,5 @@
 @interface AppDelegate : NexacroAppDelegate <UIApplicationDelegate>
 - (NexacroMainViewController*)initializeMainViewController;
 
-@property (nonatomic, assign) MultiQRBarcodePlugin *multiBarcodePlugin;
-
-
 
 @end

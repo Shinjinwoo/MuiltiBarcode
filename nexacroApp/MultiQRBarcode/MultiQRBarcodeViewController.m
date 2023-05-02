@@ -58,6 +58,8 @@ static NSString *const sessionQueueLabel = @"com.google.mlkit.visiondetector.Ses
 @property(nonatomic) MultiQRBarcodePlugin *multiQRBarcodePlugin;
 @property(nonatomic) AVCaptureDevice *device;
 
+@property (nonatomic, strong) UIProgressView *progressView;
+
 
 @end
 
@@ -89,6 +91,7 @@ static NSString *const sessionQueueLabel = @"com.google.mlkit.visiondetector.Ses
     
     [super viewDidLoad];
     
+    
     _alredySend = NO;
     _timerStatus = YES;
     _btnSend = NO;
@@ -118,6 +121,12 @@ static NSString *const sessionQueueLabel = @"com.google.mlkit.visiondetector.Ses
     _previewOverlayView.contentMode = UIViewContentModeScaleToFill;
     _previewOverlayView.translatesAutoresizingMaskIntoConstraints = NO;
     
+    
+
+    
+    //_progressView.center = self.view.center;
+    //[self.view addSubview:self.progressView];
+    
     _annotationOverlayView = [[UIView alloc] initWithFrame:CGRectZero];
     _annotationOverlayView.contentMode = UIViewContentModeScaleToFill;
     _annotationOverlayView.translatesAutoresizingMaskIntoConstraints = NO;
@@ -130,6 +139,8 @@ static NSString *const sessionQueueLabel = @"com.google.mlkit.visiondetector.Ses
     [self setUpAnnotationOverlayView];
     [self setUpCaptureSessionOutput];
     [self setUpCaptureSessionInput];
+    
+    
     
     if ( self.isUsePinchZoom == YES )
     {
@@ -158,7 +169,11 @@ static NSString *const sessionQueueLabel = @"com.google.mlkit.visiondetector.Ses
 #pragma mark - 기능단위 정리
 
 - (void)startVibrate {
-    AudioServicesPlaySystemSound(kSystemSoundID_Vibrate);
+    //AudioServicesPlaySystemSound(kSystemSoundID_Vibrate);
+    
+    UISelectionFeedbackGenerator *generator = [[UISelectionFeedbackGenerator alloc] init];
+    // 선택 피드백 생성 및 약한 진동 재생
+    [generator selectionChanged];
 }
 
 
@@ -175,13 +190,12 @@ static NSString *const sessionQueueLabel = @"com.google.mlkit.visiondetector.Ses
             if (pinch.state == UIGestureRecognizerStateBegan) {
                 initialScale = _device.videoZoomFactor;
             } else {
-                if (initialScale * pinch.scale < minAvailableZoomScale) {
+                if (initialScale * pinch.scale < minAvailableZoomScale)
                     _device.videoZoomFactor = minAvailableZoomScale;
-                } else if (initialScale * pinch.scale > maxAvailableZoomScale) {
+                else if (initialScale * pinch.scale > maxAvailableZoomScale)
                     _device.videoZoomFactor = maxAvailableZoomScale;
-                } else {
+                else
                     _device.videoZoomFactor = initialScale * pinch.scale;
-                }
                 
                 if (fabs(_device.videoZoomFactor - initialScale) >= 10 || fabs(_device.videoZoomFactor - initialScale) <= 10) {
                     [self showToast:[NSString stringWithFormat:@"배율 : %.1f",_device.videoZoomFactor] withDuration:1 delay:0.5 ];
@@ -285,7 +299,6 @@ static NSString *const sessionQueueLabel = @"com.google.mlkit.visiondetector.Ses
 
 #pragma mark - 넥사크로로 전송
 - (void) sendToMultiQRBarcodePlugin : (NSArray <MLKBarcode *>* ) barcodes {
-    
     @try {
         _returnArray = [[NSMutableArray alloc]init];
         if ( barcodes.count == 0 ) {
@@ -409,7 +422,6 @@ static NSString *const sessionQueueLabel = @"com.google.mlkit.visiondetector.Ses
 //바코드 카운팅
 - (void) countBarcode : (MLKBarcode*)barcode count : (NSInteger)count {
     
-    
     if ( _sameCount <= count )
         _sameCount = count;
     
@@ -462,7 +474,12 @@ static NSString *const sessionQueueLabel = @"com.google.mlkit.visiondetector.Ses
         [self startTimer];
     }
     
+    double testF = (double)_array.count / (double)self.limitCount ;
+    
+    _progressView.progress = testF;
+    
     if ( _array.count >= self.limitCount ) {
+        
         if ( _alredySend == NO ) {
             // 넥사크로로 전송
             [self sendToMultiQRBarcodePluginAuto];
@@ -482,12 +499,10 @@ static NSString *const sessionQueueLabel = @"com.google.mlkit.visiondetector.Ses
 // 타이머 핸들러
 -(void)timerFire:(NSTimer*)timer {
     if (_alredySend == NO) {
-        // 진동기능
         [self sendToMultiQRBarcodePluginAuto];
         [self dismissViewControllerAnimated:YES completion:nil];
     }
 }
-
 
 
 #pragma mark - 캡쳐세션
@@ -501,7 +516,6 @@ static NSString *const sessionQueueLabel = @"com.google.mlkit.visiondetector.Ses
             return;
         }
         [strongSelf.captureSession beginConfiguration];
-        
         
         /**
          해상도 설정
@@ -575,7 +589,6 @@ static NSString *const sessionQueueLabel = @"com.google.mlkit.visiondetector.Ses
                             strongSelf.device.videoZoomFactor = strongSelf.device.minAvailableVideoZoomFactor;
                         else
                             strongSelf.device.videoZoomFactor = self.zoomFactor;
-                        
                         [strongSelf.device unlockForConfiguration];
                     } else {
                         NSLog(@"%@",[error description]);
@@ -730,6 +743,7 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
         [_annotationOverlayView.bottomAnchor   constraintEqualToAnchor  :_cameraView.bottomAnchor   ]
     ]];
 }
+
 
 //카메라 화면영역
 - (void)setUpPreviewOverlayView {
@@ -887,6 +901,22 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
         UILabel *textLabel = [self getTextLabelWithCGRect:standardizedRect withDisplayValue:barcode.displayValue];
         [strongSelf.annotationOverlayView addSubview:textLabel];
     }
+    
+    
+    _progressView = [self getProgressViewWithRect:standardizedRect];
+    [strongSelf.annotationOverlayView addSubview:_progressView];
+    
+}
+
+-(UIProgressView *) getProgressViewWithRect : (CGRect) standardizedRect  {
+    CGRect progressRect = CGRectMake(standardizedRect.origin.x,
+                                     standardizedRect.origin.y + standardizedRect.size.height,
+                                     standardizedRect.size.width,
+                                     standardizedRect.size.height);
+    
+    UIProgressView *progressView = [[UIProgressView alloc]initWithFrame:progressRect];
+    
+    return progressView;
 }
 
 // 캡쳐버튼 UI 처리
