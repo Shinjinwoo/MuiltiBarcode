@@ -91,7 +91,6 @@ static NSString *const sessionQueueLabel = @"com.google.mlkit.visiondetector.Ses
     
     [super viewDidLoad];
     
-    
     _alredySend = NO;
     _timerStatus = YES;
     _btnSend = NO;
@@ -121,9 +120,6 @@ static NSString *const sessionQueueLabel = @"com.google.mlkit.visiondetector.Ses
     _previewOverlayView.contentMode = UIViewContentModeScaleToFill;
     _previewOverlayView.translatesAutoresizingMaskIntoConstraints = NO;
     
-    
-
-    
     //_progressView.center = self.view.center;
     //[self.view addSubview:self.progressView];
     
@@ -139,8 +135,6 @@ static NSString *const sessionQueueLabel = @"com.google.mlkit.visiondetector.Ses
     [self setUpAnnotationOverlayView];
     [self setUpCaptureSessionOutput];
     [self setUpCaptureSessionInput];
-    
-    
     
     if ( self.isUsePinchZoom == YES )
     {
@@ -482,6 +476,8 @@ static NSString *const sessionQueueLabel = @"com.google.mlkit.visiondetector.Ses
         
         if ( _alredySend == NO ) {
             // 넥사크로로 전송
+            
+            _progressView.hidden = YES;
             [self sendToMultiQRBarcodePluginAuto];
             
             // 뷰 종료
@@ -869,8 +865,8 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
     if (imageBuffer == nil) {
         return;
     }
-    UIImageOrientation orientation =
-    isUseFrontCamera ? UIImageOrientationLeftMirrored : UIImageOrientationRight;
+    
+    UIImageOrientation orientation = isUseFrontCamera ? UIImageOrientationLeftMirrored : UIImageOrientationRight;
     UIImage *image = [UIUtilities UIImageFromImageBuffer:imageBuffer orientation:orientation];
     
     _previewOverlayView.image = image;
@@ -904,6 +900,9 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
     
     
     _progressView = [self getProgressViewWithRect:standardizedRect];
+    
+    [_progressView progressViewStyle];
+    
     [strongSelf.annotationOverlayView addSubview:_progressView];
     
 }
@@ -915,6 +914,8 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
                                      standardizedRect.size.height);
     
     UIProgressView *progressView = [[UIProgressView alloc]initWithFrame:progressRect];
+    
+    [progressView setProgressViewStyle:UIProgressViewStyleBar];
     
     return progressView;
 }

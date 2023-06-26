@@ -3,7 +3,7 @@
     <device id="retina5_9" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="21678"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="21679"/>
         <capability name="Image references" minToolsVersion="12.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
@@ -28,27 +28,28 @@
                     <color key="backgroundColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                 </view>
                 <button opaque="NO" contentMode="scaleToFill" semanticContentAttribute="forceLeftToRight" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="rFa-Lj-eZv">
-                    <rect key="frame" x="174.66666666666666" y="695" width="26" height="26"/>
+                    <rect key="frame" x="174.66666666666666" y="695.33333333333337" width="25.666666666666657" height="25.666666666666629"/>
                     <fontDescription key="fontDescription" type="system" pointSize="16"/>
                     <color key="tintColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                     <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
                     <state key="normal">
                         <color key="titleColor" systemColor="labelColor"/>
-                        <imageReference key="image" image="circle.fill" catalog="system" symbolScale="large"/>
+                        <imageReference key="image" image="circle.fill" catalog="system" symbolScale="large" renderingMode="template"/>
                     </state>
                     <connections>
                         <action selector="onCaptureBtnClick:" destination="-1" eventType="touchUpInside" id="Mhe-IW-yi4"/>
                     </connections>
                 </button>
                 <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="jLe-cZ-unh">
-                    <rect key="frame" x="0.0" y="50" width="40" height="40"/>
+                    <rect key="frame" x="8" y="50" width="80" height="40"/>
                     <constraints>
                         <constraint firstAttribute="height" constant="40" id="Umf-hi-kNd"/>
-                        <constraint firstAttribute="width" constant="40" id="eUV-0e-Hfc"/>
+                        <constraint firstAttribute="width" constant="80" id="eUV-0e-Hfc"/>
                     </constraints>
-                    <fontDescription key="fontDescription" type="system" pointSize="1"/>
+                    <fontDescription key="fontDescription" type="system" pointSize="16"/>
+                    <color key="tintColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                     <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
-                    <state key="normal">
+                    <state key="normal" title="뒤로가기">
                         <imageReference key="image" image="chevron.backward" catalog="system" symbolScale="large"/>
                     </state>
                     <connections>
@@ -63,7 +64,7 @@
                 <constraint firstItem="rFa-Lj-eZv" firstAttribute="centerX" secondItem="X8L-Vp-CDw" secondAttribute="centerX" id="S0V-O1-7lx"/>
                 <constraint firstItem="jLe-cZ-unh" firstAttribute="top" secondItem="31e-WB-5bB" secondAttribute="top" id="ayv-99-LIT"/>
                 <constraint firstItem="X8L-Vp-CDw" firstAttribute="top" secondItem="jLe-cZ-unh" secondAttribute="bottom" id="cTV-GZ-cVC"/>
-                <constraint firstItem="jLe-cZ-unh" firstAttribute="leading" secondItem="31e-WB-5bB" secondAttribute="leading" id="dA6-i6-Qbi"/>
+                <constraint firstItem="jLe-cZ-unh" firstAttribute="leading" secondItem="31e-WB-5bB" secondAttribute="leading" constant="8" id="dA6-i6-Qbi"/>
                 <constraint firstItem="rFa-Lj-eZv" firstAttribute="centerY" secondItem="X8L-Vp-CDw" secondAttribute="bottom" constant="70" id="flu-ws-JYk"/>
                 <constraint firstItem="X8L-Vp-CDw" firstAttribute="leading" secondItem="31e-WB-5bB" secondAttribute="leading" id="nLC-Qv-vts"/>
                 <constraint firstItem="X8L-Vp-CDw" firstAttribute="bottom" secondItem="31e-WB-5bB" secondAttribute="bottom" constant="-140" id="p5w-yE-5RX"/>

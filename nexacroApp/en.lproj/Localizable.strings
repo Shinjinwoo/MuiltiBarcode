@@ -6,22 +6,22 @@
 
 */
 
-"needupdate" = "It is need to update. \r\nIt will start after the update is completed.";
-"force_close" = "Update is Completed.";
-"loadingFail" = "First loading is fail. \r\nPlease restart.";
-"updateFail" = "Update is fail. \r\nPlease restart.";
-"notexist" = "Start file is NOT exist. \r\nPlease restart.";
-"BeingUpdated" = "Being updated.";
-"wantreplace" = "There is a file of the save name. Do you want to replace? ";
-"ok" = "OK";
-"cancel" = "Cancel";
+"needupdate" = "업데이트가 있습니다. \r\n업데이트 완료 후 시작됩니다.";
+"force_close" = "업데이트 되었습니다.";
+"loadingFail" = "초기 로딩이 실패하였습니다. \r\n재시작 해 주세요.";
+"updateFail" = "업데이트가 실패하였습니다. \r\n재시작 해 주세요.";
+"notexist" = "구동에 필요한 파일이 없습니다. \r\n재시작 해 주세요.";
+"BeingUpdated" = "업데이트 중입니다.";
+"wantreplace" = "동일한 파일이 이미 존재합니다. 바꾸시겠습니까?";
+"ok" = "확인";
+"cancel" = "취소";
 "alert_title" = "";
-"move" = "Move";
-"upper" = "Upper";
-"filter" = "Filter";
-"home" = "Home";
-"nofilename" = "No File Name.";
-"checkforupdates" = "Check for updates.";
-"installforupdates" = "Install for updates.";
-"downloadingforupdates" = "Downloading for updates.";
-"new_engine_available" = "Engine update required.";
+"move" = "이동";
+"upper" = "상위";
+"filter" = "필터";
+"home" = "홈";
+"nofilename" = "파일명이 없습니다.";
+"checkforupdates" = "업데이트 확인 중입니다.";
+"installforupdates" = "업데이트 설치 중입니다.";
+"downloadingforupdates" = "업데이트 다운 중입니다.";
+"new_engine_available" = "새로운 엔진 버전이 있습니다.\r\n업데이트 하십시오.";

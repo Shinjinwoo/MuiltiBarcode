@@ -29,6 +29,7 @@ const int MLKIT_FORMAT_ALL = 0xFFFF;
     AppViewController *rootViewController;
     NexacroAppDelegate *appDelegate;
     MultiQRBarcodeViewController *multiQRBarcodeVC;
+    
 }
 
 - (DeviceAPI*) initWithWebView:(WKWebView*)theWebView {
@@ -36,8 +37,8 @@ const int MLKIT_FORMAT_ALL = 0xFFFF;
     
     appDelegate = ((NexacroAppDelegate *)[[UIApplication sharedApplication] delegate]);
     rootViewController = (AppViewController*)appDelegate.mainViewController;
-
     rootViewController.multiQRBarcodePlugin = self;
+    
     
     self = (MultiQRBarcodePlugin*)
     [super initWithWebView:theWebView];
@@ -146,7 +147,6 @@ const int MLKIT_FORMAT_ALL = 0xFFFF;
         //multiQRBarcodeVC.isUseFrontCamera = NO;
         [multiQRBarcodeVC setIsUseFrontCamera : NO];
     
-    
     #pragma mark 텍스트 라벨  사용여부 Set
     if (useTextLabel == YES )
         //multiQRBarcodeVC.isUseTextLabel = YES;
@@ -169,7 +169,6 @@ const int MLKIT_FORMAT_ALL = 0xFFFF;
         //multiQRBarcodeVC.isUseSoundEffect = YES;
         [multiQRBarcodeVC setIsUseSoundEffect : YES];
     
-    
     #pragma mark 캡쳐시 사용할 포맷 Set
     if (setBarcodeFormat != nil) {
         //multiQRBarcodeVC.setBarcodeFormat = [self getSacnFormat:setBarcodeFormat];
@@ -187,7 +186,6 @@ const int MLKIT_FORMAT_ALL = 0xFFFF;
         
         [multiQRBarcodeVC setBarcodeFormat:MLKIT_FORMAT_ALL];
     }
-    
     
     #pragma mark 오토캡쳐 사용여부 Set
     if ( useAutoCapture == YES )
@@ -242,11 +240,9 @@ const int MLKIT_FORMAT_ALL = 0xFFFF;
     UIColor *color = [UIColor clearColor];
     
     multiQRBarcodeVC.boxColor = color;
-    
-    
     [multiQRBarcodeVC setModalPresentationStyle:UIModalPresentationFullScreen];
-    [rootViewController presentViewController:multiQRBarcodeVC animated:YES completion:nil];
     
+    [rootViewController presentViewController:multiQRBarcodeVC animated:YES completion:nil];
 }
 
 #pragma mark - 스캔할 포맷 비트연산
