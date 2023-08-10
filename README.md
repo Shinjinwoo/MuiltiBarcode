@@ -11,7 +11,7 @@ MuiltiBarcode
 
 
 Nexacro 전용으로 개발 되었으나... MultiQRBarcodeViewControlle를 적절하게 응용하면 Native나 Hybrid로도 사용 가능합니다.
-###
+
 
 
 
