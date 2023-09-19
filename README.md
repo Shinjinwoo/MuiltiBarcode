@@ -143,7 +143,8 @@ MultiQRBarcodePlugin.TYPE = {
     GEO             : 10,   // 지리 좌표의 바코드 값 유형입니다.
     CALENDAR_EVENT  : 11,   // QRCode에 담겨져 있는 달력 이벤트
     DRIVER_LICENSE  : 12    // 운전면허증 데이터의 바코드 값 유형입니다. 
-};```
+};
+```
 
 
 
@@ -152,22 +153,6 @@ MultiQRBarcodePlugin.TYPE = {
 1. cocoapod 라이브러리 설치 
 	사용예 ) Podfile : [코코아팟 사용법 참조](https://velog.io/@james-chun-dev/Xcode-Cocoapod-%EC%82%AC%EC%9A%A9%EB%B2%95) 
 
-```
-# Uncomment the next line to define a global platform for your project
-# platform :ios, '9.0'
-
-
-target 'nexacroApp' do
- # Comment the next line if you don't want to use dynamic frameworks
- use_frameworks!
-
-
- # Pods for nexacroApp
- pod 'GoogleMLKit/BarcodeScanning', '3.2.0'
-
-
-end
-```
 
 2. 샘플 프로젝트 ‘MultiQRBarcode’ 디렉토리 내에 필요한 파일, 프로젝트에 첨부
 
@@ -183,6 +168,7 @@ end
 3. AppDelegate.h 파일 내 MultiQRBarcodePlugin 인스턴스 synthesize 코드 삽입
 
 - AppDelegate.h 파일
+
 ```objc
 #import "MultiQRBarcodePlugin.h"
 
@@ -192,7 +178,6 @@ end
 }
 @property (nonatomic, assign) MultiQRBarcodePlugin *multiQRBarcodePlugin;
 @end
-
 ```
 
 - AppDelegate.m 파일 
@@ -205,7 +190,7 @@ end
 ```
 
 4. info.plist에 카메라 권한 설정 부여
-	- info.plist에만 카메라 권한 사용이 명시 되면, iOS Runtime 모듈 내에서 코드로 후 처리
+	- info.plist에만 카메라 권한 사용이 명시 되면, iOS Runtime 모듈 내에서 코드로 후 처리 <br>
 		 [카메라 권한 설정 참조](https://adjh54.tistory.com/126)
 
 5. PluginCommonNP 프레임워크 추가
