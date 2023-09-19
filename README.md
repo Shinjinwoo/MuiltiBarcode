@@ -38,7 +38,7 @@
 
 3. MultiQRBarcodePlugin 연동 함수
   
-   ## 모듈 생성자
+## 모듈 생성자
  - nexacro.MultiQRBarcodePlugin() 함수를 사용합니다.
 ```javascript
 this.addChild("multiQRBarcodePlugin",new nexacro.MultiQRBarcodePlugin());
@@ -75,7 +75,7 @@ this.addChild("multiQRBarcodePlugin",new nexacro.MultiQRBarcodePlugin());
 this.multiQRBarcodePlugin.callMethod("scan", param);
 ```
 
-addEventHandler()
+## addEventHandler()
 	1) callMethod() 함수 호출 후 결과를 받아오는 함수를 "oncallback" 에 등록해 줍니다.
 		등록할 함수는 모듈 Object 와 처리 결과값 입니다.
            처리 결과값에는 아래 값들을 포함합니다.
@@ -101,3 +101,112 @@ this.on_MultiQRBarcodePlugin_callback = function(obj, e) {
 }
 
 ```
+
+## 상수 정리표
+
+MultiQRBarcodePlugin.js에 등록
+
+- 바코드 포멧 상수 
+```Javascript
+// 바코드에서 사용하는 포맷 상수
+MultiQRBarcodePlugin.FORMAT = {
+    UNKNOWN     : -1,   // 포맷특정 불가
+    ALL_FORMATS : 0,    // 모든 포맷
+    CODE_128    : 1,    // CODE_128
+    CODE_39     : 2,    // CODE_39
+    CODE_93     : 4,    // CODE_93
+    CODABAR     : 8,    // CODABAR
+    DATA_MATRIX : 16,   // DATA_MATRIX
+    EAN_13      : 32,   // EAN_13
+    EAN_8       : 64,   // EAN_8
+    ITF         : 128,  // ITF
+    QR_CODE     : 256,  // QR_CODE
+    UPC_A       : 512,  // UPC_A
+    UPC_E       : 1024, // UPC_E
+    PDF417      : 2048, // PDF417
+    AZTEC       : 4096  // AZTEC
+};
+```
+- 바코드 valueType 상수 
+```Javascript
+MultiQRBarcodePlugin.TYPE = {
+    UNKNOWN         : 0,    // 밸류 타입 특정 불가
+    CONTACT_INFO    : 1,    // 연락처 정보
+    EMAIL           : 2,    // 이메일 주소
+    ISBN            : 3,    // ISBN의 바코드 값 유형
+    PHONE           : 4,    // 전화번호 유형
+    PRODUCT         : 5,    // 프로덕트 코드
+    SMS             : 6,    // SMS 값 유형입니다.
+    TEXT            : 7,    // 일반 텍스트의 바코드 값 유형입니다.
+    URL             : 8,    // URL/북마크의 바코드 값 유형입니다.
+    WIFI            : 9,    // Wi-Fi 액세스 포인트 세부정보
+    GEO             : 10,   // 지리 좌표의 바코드 값 유형입니다.
+    CALENDAR_EVENT  : 11,   // QRCode에 담겨져 있는 달력 이벤트
+    DRIVER_LICENSE  : 12    // 운전면허증 데이터의 바코드 값 유형입니다. 
+};```
+
+
+
+## Xcode 프로젝트 설정
+
+1. cocoapod 라이브러리 설치 
+	사용예 ) Podfile : [코코아팟 사용법 참조](https://velog.io/@james-chun-dev/Xcode-Cocoapod-%EC%82%AC%EC%9A%A9%EB%B2%95) 
+
+```
+# Uncomment the next line to define a global platform for your project
+# platform :ios, '9.0'
+
+
+target 'nexacroApp' do
+ # Comment the next line if you don't want to use dynamic frameworks
+ use_frameworks!
+
+
+ # Pods for nexacroApp
+ pod 'GoogleMLKit/BarcodeScanning', '3.2.0'
+
+
+end
+```
+
+2. 샘플 프로젝트 ‘MultiQRBarcode’ 디렉토리 내에 필요한 파일, 프로젝트에 첨부
+
+| <center>파일명</center> |<center>용도</center> |
+|---|---|
+| MultiQRBarcodePlugin.h,<br> MultiQRBarcodePlugin.m| 멀티 바코드 플러그인 인스턴스iOS Runtime의 경우<br> h,m파일명을‘MultiQRBarcodePlugin’ 으로 <br>일치 시켜야 JS에서 인스턴스 인식|
+|MultiQRBarcodeViewController.h,<br>MultiQRBarcodeViewController.m|멀티 바코드 인식 및 화면 제어용 뷰 컨트롤러|
+| MultiQRBarcodeViewController.xib | 네이티브 UI용 XIB 파일 |
+| UiUtilites.h,UiUtilites.m | 네이티브 UI 제어용 유틸리티 파일 |
+| scan_beep.mp3 | 스캔 사운드 파일 |
+
+
+3. AppDelegate.h 파일 내 MultiQRBarcodePlugin 인스턴스 synthesize 코드 삽입
+
+- AppDelegate.h 파일
+```objc
+#import "MultiQRBarcodePlugin.h"
+
+@interface AppViewController : NexacroMainViewController
+{
+    
+}
+@property (nonatomic, assign) MultiQRBarcodePlugin *multiQRBarcodePlugin;
+@end
+
+```
+
+- AppDelegate.m 파일 
+```objc
+#import "AppDelegate.h"
+@implementation AppViewController
+@synthesize multiQRBarcodePlugin;
+
+@end
+```
+
+4. info.plist에 카메라 권한 설정 부여
+	- info.plist에만 카메라 권한 사용이 명시 되면, iOS Runtime 모듈 내에서 코드로 후 처리
+		 [카메라 권한 설정 참조](https://adjh54.tistory.com/126)
+
+5. PluginCommonNP 프레임워크 추가
+	- 샘플 프로젝트에 같이 첨부된 Library/PluginCommonNP.framework 추가
