@@ -35,9 +35,9 @@
 
 
 1. 연동 Javascript 복사
+
 	레포지토리의 nexacroN_ui/nexacrolib/component 폴더에서 아래 파일을 
-    넥사크로 프로젝트 → Tools →Option → Project → Nexacro SDK → Base Library
-    경로에 복사
+	넥사크로 프로젝트 → Tools →Option → Project → Nexacro SDK → Base Library 경로에 복사
 
 
 |![](https://lh5.googleusercontent.com/1aajGU6hkkAUqvPpm7k6WGf5ema0VpsKOD3xXDvTdo4MMcCvt698c5ZwRGpuqQqVwCVnANxncsq83dKC8a6Xulh_k1h4r0-py7pfkrsehcpKdPHu84tVokg-CWH2zDff7kSMrwDDo386eazTD3UuLsc) |
