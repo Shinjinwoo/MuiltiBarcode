@@ -1,18 +1,19 @@
 
 
+
 - 개발의도 : 하이브리드 앱 환경에서 디바이스 카메라를 활용해 실시간으로 여러줄의 바코드와 QR 정보를 얻기 위해 만들어 졌습니다.
 
-- 바코드 세팅 넥사크로 화면 [WebView에 띄운 HTML5 페이지로 보아도 무방]
 
-<img src="https://lh5.googleusercontent.com/U1Z-SOz9ySDI0BGECf_PI4Vk_meeiKR20_HIVXcbwJ5Z_ntnQ4PnEKendj1Zp8LVIMRekz4ej1pTsHNjG-F2zWA3f-vrcq_EO5s4U3h7Uxas_1LNYE9nLmhgpgxJL2NBJosknkoUSydQTu1QKIS0J-E" width="294" height="635"/>
 
-- 캡쳐 화면 [Native ViewController]
+| 바코드 세팅화면 | 캡처 화면 | 캡쳐 결과 | 
+|:---:|:---:|:---:|
+|<img src="https://lh5.googleusercontent.com/U1Z-SOz9ySDI0BGECf_PI4Vk_meeiKR20_HIVXcbwJ5Z_ntnQ4PnEKendj1Zp8LVIMRekz4ej1pTsHNjG-F2zWA3f-vrcq_EO5s4U3h7Uxas_1LNYE9nLmhgpgxJL2NBJosknkoUSydQTu1QKIS0J-E" width="294" height="635"/> | <img src="https://lh4.googleusercontent.com/8RE-nCtonMSpOwt8MiX-ZBSmxG-h_tjWGI94F5Y0n9z48pobbd6XmBrvdjhioGWtLcQLxxrElbZffnSCzgdIBViMXJOKScKu76gQzPkaovm0V--7jU5W_7-it3HZ_6ZKBj3SarypU5RaRHVQCvy0srY" width="294" height="635"/> | <img src="https://lh5.googleusercontent.com/iU2bKvnThl7GXQTYFdZrMUkScHkDHPrkic59cNriuAgyF7vfWUIDDZi8CAw1QQX6Ei2PmpbeheyljjP2pAJeSYm8fYzf2WbjdLwgQb3F5jY9j5MyTRa7ZyZzsGHuTdixM0yzwwgHxgW8rKoS6vqsU8g" width="294" height="635"/>|
 
-<img src="https://lh4.googleusercontent.com/8RE-nCtonMSpOwt8MiX-ZBSmxG-h_tjWGI94F5Y0n9z48pobbd6XmBrvdjhioGWtLcQLxxrElbZffnSCzgdIBViMXJOKScKu76gQzPkaovm0V--7jU5W_7-it3HZ_6ZKBj3SarypU5RaRHVQCvy0srY" width="294" height="635"/>
 
-- 캡쳐 결과 전송
 
-<img src="https://lh5.googleusercontent.com/iU2bKvnThl7GXQTYFdZrMUkScHkDHPrkic59cNriuAgyF7vfWUIDDZi8CAw1QQX6Ei2PmpbeheyljjP2pAJeSYm8fYzf2WbjdLwgQb3F5jY9j5MyTRa7ZyZzsGHuTdixM0yzwwgHxgW8rKoS6vqsU8g" width="294" height="635"/>
+
+
+
 
 
 
