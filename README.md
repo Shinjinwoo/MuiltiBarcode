@@ -112,7 +112,6 @@ this.on_MultiQRBarcodePlugin_callback = function(obj, e) {
     trace("this.on_MultiBarcodePlugin_callback ::: "+e.reason);
     trace("this.on_MultiBarcodePlugin_callback ::: "+JSON.stringify(e.returnvalue)); 
 }
-
 ```
 
 ## 상수 정리표
@@ -156,7 +155,8 @@ MultiQRBarcodePlugin.TYPE = {
     GEO             : 10,   // 지리 좌표의 바코드 값 유형입니다.
     CALENDAR_EVENT  : 11,   // QRCode에 담겨져 있는 달력 이벤트
     DRIVER_LICENSE  : 12    // 운전면허증 데이터의 바코드 값 유형입니다. 
-};```
+};
+```
 
 
 
