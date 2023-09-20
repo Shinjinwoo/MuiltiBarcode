@@ -1,8 +1,23 @@
 
 
-
-
 - 개발의도 : 하이브리드 앱 환경에서 디바이스 카메라를 활용해 실시간으로 여러줄의 바코드와 QR 정보를 얻기 위해 만들어 졌습니다.
+
+- 바코드 세팅 넥사크로 화면 [WebView에 띄운 HTML5 페이지로 보아도 무방]
+
+<img src="https://lh5.googleusercontent.com/U1Z-SOz9ySDI0BGECf_PI4Vk_meeiKR20_HIVXcbwJ5Z_ntnQ4PnEKendj1Zp8LVIMRekz4ej1pTsHNjG-F2zWA3f-vrcq_EO5s4U3h7Uxas_1LNYE9nLmhgpgxJL2NBJosknkoUSydQTu1QKIS0J-E" width="294" height="635"/>
+
+- 캡쳐 화면 [Native ViewController]
+
+<img src="https://lh4.googleusercontent.com/8RE-nCtonMSpOwt8MiX-ZBSmxG-h_tjWGI94F5Y0n9z48pobbd6XmBrvdjhioGWtLcQLxxrElbZffnSCzgdIBViMXJOKScKu76gQzPkaovm0V--7jU5W_7-it3HZ_6ZKBj3SarypU5RaRHVQCvy0srY" width="294" height="635"/>
+
+- 캡쳐 결과 전송
+
+<img src="https://lh5.googleusercontent.com/iU2bKvnThl7GXQTYFdZrMUkScHkDHPrkic59cNriuAgyF7vfWUIDDZi8CAw1QQX6Ei2PmpbeheyljjP2pAJeSYm8fYzf2WbjdLwgQb3F5jY9j5MyTRa7ZyZzsGHuTdixM0yzwwgHxgW8rKoS6vqsU8g" width="294" height="635"/>
+
+
+
+## 플러그인 사용 개요
+
 
 |플러그인명|MultiQRBarcode|
 |:---:|:---:|
@@ -16,8 +31,6 @@
 |카메라 퍼미션 획득 실패 | -9 |
 | 성공 | 0 |
 | 실패 | -1 |
-
-
 
 
 
@@ -143,8 +156,7 @@ MultiQRBarcodePlugin.TYPE = {
     GEO             : 10,   // 지리 좌표의 바코드 값 유형입니다.
     CALENDAR_EVENT  : 11,   // QRCode에 담겨져 있는 달력 이벤트
     DRIVER_LICENSE  : 12    // 운전면허증 데이터의 바코드 값 유형입니다. 
-};
-```
+};```
 
 
 
@@ -153,6 +165,22 @@ MultiQRBarcodePlugin.TYPE = {
 1. cocoapod 라이브러리 설치 
 	사용예 ) Podfile : [코코아팟 사용법 참조](https://velog.io/@james-chun-dev/Xcode-Cocoapod-%EC%82%AC%EC%9A%A9%EB%B2%95) 
 
+```
+# Uncomment the next line to define a global platform for your project
+# platform :ios, '9.0'
+
+
+target 'nexacroApp' do
+ # Comment the next line if you don't want to use dynamic frameworks
+ use_frameworks!
+
+
+ # Pods for nexacroApp
+ pod 'GoogleMLKit/BarcodeScanning', '3.2.0'
+
+
+end
+```
 
 2. 샘플 프로젝트 ‘MultiQRBarcode’ 디렉토리 내에 필요한 파일, 프로젝트에 첨부
 
@@ -168,7 +196,6 @@ MultiQRBarcodePlugin.TYPE = {
 3. AppDelegate.h 파일 내 MultiQRBarcodePlugin 인스턴스 synthesize 코드 삽입
 
 - AppDelegate.h 파일
-
 ```objc
 #import "MultiQRBarcodePlugin.h"
 
@@ -178,6 +205,7 @@ MultiQRBarcodePlugin.TYPE = {
 }
 @property (nonatomic, assign) MultiQRBarcodePlugin *multiQRBarcodePlugin;
 @end
+
 ```
 
 - AppDelegate.m 파일 
@@ -190,7 +218,7 @@ MultiQRBarcodePlugin.TYPE = {
 ```
 
 4. info.plist에 카메라 권한 설정 부여
-	- info.plist에만 카메라 권한 사용이 명시 되면, iOS Runtime 모듈 내에서 코드로 후 처리 <br>
+	- info.plist에만 카메라 권한 사용이 명시 되면, iOS Runtime 모듈 내에서 코드로 후 처리
 		 [카메라 권한 설정 참조](https://adjh54.tistory.com/126)
 
 5. PluginCommonNP 프레임워크 추가
