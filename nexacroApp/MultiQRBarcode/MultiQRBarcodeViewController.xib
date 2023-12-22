@@ -39,6 +39,7 @@
                     <state key="normal">
                         <color key="titleColor" systemColor="labelColor"/>
                         <imageReference key="image" image="circle.fill" catalog="system" symbolScale="large"/>
+                        <preferredSymbolConfiguration key="preferredSymbolConfiguration" configurationType="pointSize" pointSize="80"/>
                     </state>
                     <connections>
                         <action selector="onCaptureBtnClick:" destination="-1" eventType="touchUpInside" id="Mhe-IW-yi4"/>
